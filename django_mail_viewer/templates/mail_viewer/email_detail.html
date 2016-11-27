@@ -1,0 +1,31 @@
+<html>
+<head>
+	<title>Django Mail Viewer - Email Detail</title>
+</head>
+<body>
+	<div>
+		<div class="header_info">
+		{{ message.cc }}
+		{{ message.bcc}}
+		{{ message.message.date }}
+		
+		{% for h in message.extra_headers %}
+			{{ h }}
+		{% endfor %}
+		</div>
+		<div class="email__body">
+			<div class="email__body--text">
+				{{ message.body }}
+			</div>
+			<div clss="email__body--html">
+				{% if message.alternatives %}
+					{{ message.alternatives.0.body|safe }}
+				{% endif %}
+			</div>
+		</div>
+		<div class="email__attachments">
+			{{ message.attachments }}
+		</div>
+	</div>
+</body>
+</html>
