@@ -17,7 +17,7 @@ class EmailListView(TemplateView):
         # TODO: need to make a custom backend which sets a predictable message-id header.
         # built in locmem uses a random number each time the message is accessed
         # preventing lookup in the detail view
-        with mail.get_connection('django.core.mail.backends.locmem.EmailBackend') as connection:
+        with mail.get_connection('django_mail_viewer.backends.locmem.EmailBackend') as connection:
             if hasattr(mail, 'outbox'):
                 # TODO: remove this
                 mail.outbox = []
@@ -32,7 +32,8 @@ class EmailListView(TemplateView):
                         connection=connection)
 
                 m = mail.EmailMultiAlternatives('HTML Mail Subject', 'html email text', 'test@example.com',
-                        ['to1@example.com', 'to2.example.com'])
+                        ['to1@example.com', 'to2.example.com'],
+                        connection=connection)
                 m.attach_alternative('<html><body><p>HTML Email Content</p></body></html>', 'text/html')
                 current_dir = os.path.dirname(__file__)
                 test_file_attachment = os.path.join(current_dir, 'icon_e_confused.gif')
@@ -60,7 +61,7 @@ class EmailDetailView(TemplateView):
     template_name = 'mail_viewer/email_detail.html'
 
     def get_message(self):
-        with mail.get_connection('django.core.mail.backends.locmem.EmailBackend') as connection:
+        with mail.get_connection('django_mail_viewer.backends.locmem.EmailBackend') as connection:
             for message in mail.outbox:
                 message_id = message.message()['Message-ID']
                 if message_id == '<%s>' % self.kwargs.get('message_id'):
