@@ -62,6 +62,8 @@ class EmailDetailView(TemplateView):
 
     def get_message(self):
         with mail.get_connection('django_mail_viewer.backends.locmem.EmailBackend') as connection:
+            # TODO: possibly move this logic to a method on the EmailBackend, allowing for easier implementation
+            # of multiple EmailBackends which look up/store the data differently.
             for message in mail.outbox:
                 message_id = message.message()['Message-ID']
                 if message_id == '<%s>' % self.kwargs.get('message_id'):
