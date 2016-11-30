@@ -43,14 +43,6 @@ class EmailListView(TemplateView):
                 #### END
                 # locmem backend
                 outbox  = mail.outbox[:]
-            elif hasattr(connection, 'file_path'):
-                # filebased backend
-                # read the files, make list, return it?  Will need to experiment with backend
-                # to see how it stores html email, attachments, etc.
-                raise ValueError("Only the locmem email backend is currently supported")
-            else:
-                # raise exception about unsupport backend?
-                raise ValueError("Only the locmem email backend is currently supported")
         return super(EmailListView, self).get_context_data(outbox=outbox, **kwargs)
 
 
@@ -62,13 +54,16 @@ class EmailDetailView(TemplateView):
 
     def get_message(self):
         with mail.get_connection('django_mail_viewer.backends.locmem.EmailBackend') as connection:
-            for message in mail.outbox:
-                message_id = message.message()['Message-ID']
-                if message_id == '<%s>' % self.kwargs.get('message_id'):
-                    return message
+            message_id = self.kwargs.get('message_id')
+            message = connection.get_message(message_id)
+            if message:
+                return message
         raise Http404('Message id not found')
 
     def get_context_data(self, **kwargs):
-        message = self.get_message()
-        return super(EmailDetailView, self).get_context_data(message=message, **kwargs)
+        lookup_id, message, headers = self.get_message()
+        return super(EmailDetailView, self).get_context_data(lookup_id=lookup_id,
+                                                             message=message,
+                                                             headers=headers,
+                                                             **kwargs)
 

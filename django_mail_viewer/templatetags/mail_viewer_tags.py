@@ -7,6 +7,11 @@ register = template.Library()
 
 
 @register.simple_tag
+def header_from_dict(headers, key):
+    # because some header keys have a hyphen and so don't play nicely with templates
+    return headers.get(key)
+
+@register.simple_tag
 def email_message_id(message):
     """
     Return the message id of an email message.

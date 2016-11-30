@@ -6,15 +6,14 @@
 	<body>
 		<div class="email_list">
 			<ul>
-				{% for message in outbox %}
+				{% for lookup_id, message, headers in outbox %}
 					<li>
-						{% email_message_id message as message_id %}
-						<a href="{% url 'mail_viewer_detail' message_id|cut:'<'|cut:'>' %}" target="email_detail_iframe">
+						<a href="{% url 'mail_viewer_detail' lookup_id %}" target="email_detail_iframe">
 							<div>
 								{{ message.subject }}<br>
 								From: {{ message.from }}<br>
 								To: {% for r in message.recipients %}{{ r }}; {% endfor %}<br>
-								Sent: {{ message.message.date }}
+								Sent: {{ headers.date }}
 							</div>
 						</a>
 					</li>

@@ -11,9 +11,11 @@ class EmailBackend(BaseEmailBackend):
     """
     An email backend to use during testing and local development with Django Mail Viewer.
 
-    Mirrors django.core.backends.locmem.EmailBackend to set a consistent Message-ID header
-    on each email so that a single email can easily be retrieved/viewed.  This is done by
-    adding the 'Message-ID' key to `extra_headers` if it is not already there.
+    Similar to django.core.backends.locmem.EmailBackend, this adds an outbox attribute ot
+    django.core.mail.  This stores the EmailMessage object as well as message.message().
+    This is because many of the headers are generated at the time message.message() is called
+    and are not stored by the default locmem backend, including ones useful for consistently
+    looking up a specific message even if the list is reordered.
     """
 
     def __init__(self, *args, **kwargs):
@@ -24,11 +26,15 @@ class EmailBackend(BaseEmailBackend):
     def send_messages(self, messages):
         msg_count = 0
         for message in messages:
-            header_names = [key.lower() for key in message.extra_headers]
             m = message.message()
-            if 'message-id' not in header_names:
-                message.extra_headers['Message-ID'] = m['Message-ID']
-            mail.outbox.append(message)
-            print('extra headers is %s' % message.extra_headers)
+            lookup_id = m.get('Message-ID').strip('<>')
+            mail.outbox.append((lookup_id, message, m))
             msg_count += 1
         return msg_count
+
+    def get_message(self, lookup_id):
+        for message in mail.outbox:
+            if message[0] == lookup_id:
+                return message
+        return None
+
