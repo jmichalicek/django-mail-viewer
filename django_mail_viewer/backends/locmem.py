@@ -24,6 +24,10 @@ class EmailBackend(BaseEmailBackend):
             mail.outbox = []
 
     def send_messages(self, messages):
+        # TODO: Tweak this.  If the same message object is used to multiple times it will get put in the mailbox twice
+        # but identifying which send will not be reasonable.  We also make use of headers which are calculated
+        # at runtime in EmailMessage.message() and so are not accurate when displayed.  We need to have mail.outbox
+        # store both the EmailMessage instance AND the dict returned by EmailMessage.message() perhaps as a list of tuples.
         msg_count = 0
         for message in messages:
             m = message.message()
