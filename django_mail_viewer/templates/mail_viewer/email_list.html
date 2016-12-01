@@ -2,6 +2,36 @@
 <html>
 	<head>
 		<title>Django Mail Viewer - Email List</title>
+		<style>
+			body {
+				margin: 0 30px;
+				padding: 0;
+			}
+			.email_list {
+				float: left;
+				width: 20%;
+				padding: 10px 10px 0;
+				height: 100%;
+			}
+			.email_list > ul {
+				list-style: none;
+			}
+			.email_list--list_item {
+				border: 1px solid black;
+				margin: 2px 0;
+			}
+			.email_detail {
+				float: left;
+				width: 70%;
+				padding: 10px 10px 0;
+        height: calc(100% - 20px);
+			}
+			.email_detail > iframe {
+				width: 100%;
+				height: calc(100% - 20px);
+				padding: 0;
+			}
+		</style>
   </head>
 	<body>
 		<div class="email_list">
@@ -9,7 +39,7 @@
 				{% for lookup_id, message, headers in outbox %}
 					<li>
 						<a href="{% url 'mail_viewer_detail' lookup_id %}" target="email_detail_iframe">
-							<div>
+							<div class="email_list--list_item">
 								{{ message.subject }}<br>
 								From: {{ message.from }}<br>
 								To: {% for r in message.recipients %}{{ r }}; {% endfor %}<br>
