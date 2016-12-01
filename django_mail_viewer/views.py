@@ -34,7 +34,7 @@ class EmailListView(TemplateView):
                 m = mail.EmailMultiAlternatives('HTML Mail Subject', 'html email text', 'test@example.com',
                         ['to1@example.com', 'to2.example.com'],
                         connection=connection)
-                m.attach_alternative('<html><body><p>HTML Email Content</p></body></html>', 'text/html')
+                m.attach_alternative('<html><body><p style="background-color: AABBFF; color: white">HTML Email Content</p></body></html>', 'text/html')
                 current_dir = os.path.dirname(__file__)
                 test_file_attachment = os.path.join(current_dir, 'icon_e_confused.gif')
                 m.attach('design.png', test_file_attachment, 'image/png')

@@ -3,6 +3,10 @@
 <head>
 	<title>Django Mail Viewer - Email Detail</title>
 	<style>
+		.email__attachments {
+			border: 1px solid black;
+			margin: 5px 0;
+		}
 		.email__body--text {
 			border: 1px solid black;
 			margin: 10px auto;
@@ -10,11 +14,37 @@
 		.email__body--html {
 			border: 1px solid black;
 		}
+
+		.tabs {
+			list-style: none;
+			padding: 0;
+		}
+
+		.tabs li { display: inline; }
+		.tabs li a {
+			color: black;
+			float: left;
+			display: block;
+			padding: 4px 10px;
+			margin-left: -1px;
+			position: relative;
+			left: 1px;
+			background: white;
+			text-decoration: none;
+			border: 1px solid black;
+		}
+		.tabs li a:hover { background: #ccc; }
+		.tabs::after {
+			content:"";
+			display:table;
+			clear:both;
+		}
 	</style>
 </head>
 <body>
 	<div>
 		<div class="header_info">
+			<h3>Headers</h3>
 			Subject: {{ headers.subject }}<br>
 			From: {{ headers.from }};<br>
 			To: {% for email in  message.recipients %}{{ email }};{% endfor %}<br>
@@ -24,21 +54,49 @@
 			Content-Type: {% header_from_dict headers 'Content-Type' %}<br>
 			Message-ID: {% header_from_dict headers 'Message-ID' %}<br>
 		</div>
+    <div class="email__attachments">
+			<h3>Attachments</h3>
+      {{ message.attachments }}
+    </div>
+
 		<div class="email__body">
-			<div class="email__body--text">
-				<p>
-					{{ message.body }}<br>
-				</p>
+			<ul class="tabs">
+				<li><a href="#" class="tab" data-target=".email__body--text">Plain text</a></li>
+				<li><a href="#" class="tab" data-target=".email__body--html">HTML</a></li>
+			</ul>
+			<div class="tabs__panes">
+				<div class="email__body--text">
+					<p>
+						{{ message.body }}<br>
+					</p>
+				</div>
+				<div class="email__body--html">
+					{% if message.alternatives %}
+						{{ message.alternatives.0.0|safe }}
+					{% endif %}
+				</div>
 			</div>
-			<div class="email__body--html">
-				{% if message.alternatives %}
-					{{ message.alternatives.0.0|safe }}
-				{% endif %}
-			</div>
-		</div>
-		<div class="email__attachments">
-			{{ message.attachments }}
 		</div>
 	</div>
+	<script>
+		(function () {
+			var tabs = document.querySelectorAll('a.tab');
+			var tabPanes = document.querySelectorAll('.tabs__panes > div');
+			for(var i=0; i<tabs.length; i++) {
+				tabs[i].onclick = function (e) {
+					var target = document.querySelector(e.currentTarget.dataset.target);
+					for(var x=0; x<tabPanes.length; x++) {
+						tabPanes[x].style.display = "none";
+					}
+					target.style.display = "block";
+				};
+			}
+
+			// display only the first tab pane
+			for(var i=1; i<tabPanes.length; i++) {
+				tabPanes[i].style.display = "none";
+			}
+		})();
+	</script>
 </body>
 </html>
