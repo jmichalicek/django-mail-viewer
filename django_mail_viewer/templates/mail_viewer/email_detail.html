@@ -7,17 +7,15 @@
 			border: 1px solid black;
 			margin: 5px 0;
 		}
-		.email__body--text {
+		.email__body--text, .email__body--html, .email__attachments {
 			border: 1px solid black;
-			margin: 10px auto;
+			margin: 0 auto;
 		}
-		.email__body--html {
-			border: 1px solid black;
-		}
-
 		.tabs {
 			list-style: none;
 			padding: 0;
+			margin: 10px 0 0;
+			border-bottom: none;
 		}
 
 		.tabs li { display: inline; }
@@ -32,8 +30,13 @@
 			background: white;
 			text-decoration: none;
 			border: 1px solid black;
+			border-bottom: none;
+			border-radius: 5% 5% 0 0;
 		}
-		.tabs li a:hover { background: #ccc; }
+		.tabs.active {
+			background: #ccc;
+		}
+		.tabs li a:hover, .tabs li a.active { background: #ccc; }
 		.tabs::after {
 			content:"";
 			display:table;
@@ -44,8 +47,7 @@
 <body>
 	<div>
 		<div class="header_info">
-			<h3>Headers</h3>
-			Subject: {{ headers.subject }}<br>
+			<h3>{{ headers.subject }}</h3>
 			From: {{ headers.from }};<br>
 			To: {% for email in  message.recipients %}{{ email }};{% endfor %}<br>
 			CC: {% for email in message.cc %}{{ email }};{% endfor %}<br>
@@ -54,15 +56,11 @@
 			Content-Type: {% header_from_dict headers 'Content-Type' %}<br>
 			Message-ID: {% header_from_dict headers 'Message-ID' %}<br>
 		</div>
-    <div class="email__attachments">
-			<h3>Attachments</h3>
-      {{ message.attachments }}
-    </div>
-
 		<div class="email__body">
 			<ul class="tabs">
-				<li><a href="#" class="tab" data-target=".email__body--text">Plain text</a></li>
+				<li><a href="#" class="tab active" data-target=".email__body--text">Plain text</a></li>
 				<li><a href="#" class="tab" data-target=".email__body--html">HTML</a></li>
+				<li><a href="#" class="tab" data-target=".email__attachments">Attachments</a></li>
 			</ul>
 			<div class="tabs__panes">
 				<div class="email__body--text">
@@ -75,6 +73,15 @@
 						{{ message.alternatives.0.0|safe }}
 					{% endif %}
 				</div>
+				<div class="email__attachments">
+					{% for attachment in attachments %}
+
+					file: <a href="{% url 'mail_viewer_attachment' message_id=lookup_id attachment=forloop.counter0 %}">{{ attachment.0 }}</a><br>
+					content-type: {{ attachment.2 }}<br>
+					{% empty %}
+						<p>No attachments</p>
+					{% endfor %}
+				</div>
 			</div>
 		</div>
 	</div>
@@ -85,10 +92,14 @@
 			for(var i=0; i<tabs.length; i++) {
 				tabs[i].onclick = function (e) {
 					var target = document.querySelector(e.currentTarget.dataset.target);
+					for(var x=0; x<tabs.length; x++) {
+						tabs[x].classList.remove('active');
+					}
 					for(var x=0; x<tabPanes.length; x++) {
 						tabPanes[x].style.display = "none";
 					}
 					target.style.display = "block";
+					e.currentTarget.classList.add('active');
 				};
 			}
 

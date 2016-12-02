@@ -1,8 +1,9 @@
 from __future__ import unicode_literals, absolute_import, division, print_function
 
 from django.core import mail
-from django.http import Http404
-from django.views.generic.base import TemplateView
+from django.http import Http404, HttpResponse
+from django.utils.encoding import smart_str
+from django.views.generic.base import TemplateView, View
 
 import os
 
@@ -37,7 +38,7 @@ class EmailListView(TemplateView):
                 m.attach_alternative('<html><body><p style="background-color: AABBFF; color: white">HTML Email Content</p></body></html>', 'text/html')
                 current_dir = os.path.dirname(__file__)
                 test_file_attachment = os.path.join(current_dir, 'icon_e_confused.gif')
-                m.attach('design.png', test_file_attachment, 'image/png')
+                m.attach_file(test_file_attachment)
                 m.send()
                 # TODO: attachment
                 #### END
@@ -65,5 +66,33 @@ class EmailDetailView(TemplateView):
         return super(EmailDetailView, self).get_context_data(lookup_id=lookup_id,
                                                              message=message,
                                                              headers=headers,
+                                                             attachments=message.attachments,
                                                              **kwargs)
 
+class EmailAttachmentDownloadView(View):
+    """
+    Stream out an email attachment to the web browser
+    """
+
+    def get_message(self):
+        with mail.get_connection('django_mail_viewer.backends.locmem.EmailBackend') as connection:
+            message_id = self.kwargs.get('message_id')
+            message = connection.get_message(message_id)
+            if message:
+                return message
+        raise Http404('Message id not found')
+    
+    def get_attachment(self, message):
+        # TODO: eventually will need to handle different ways of having these
+        # attachments stored.  Probably handle that on the EmailBackend class
+        try:
+            return message.attachments[int(self.kwargs.get('attachment'))]
+        except IndexError:
+            raise Http404('Attachment not found')
+
+    def get(self, request, *args, **kwargs):
+        lookup_id, message, headers = self.get_message()
+        attachment = self.get_attachment(message) 
+        response = HttpResponse(attachment[1], content_type=attachment[2])
+        response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(attachment[0])
+        return response
