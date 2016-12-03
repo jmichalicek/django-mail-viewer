@@ -4,10 +4,9 @@
 	<title>Django Mail Viewer - Email Detail</title>
 	<style>
 		.email__attachments {
-			border: 1px solid black;
 			margin: 5px 0;
 		}
-		.email__body--text, .email__body--html, .email__attachments {
+		.tab_pane {
 			border: 1px solid black;
 			margin: 0 auto;
 		}
@@ -58,29 +57,42 @@
 		</div>
 		<div class="email__body">
 			<ul class="tabs">
-				<li><a href="#" class="tab active" data-target=".email__body--text">Plain text</a></li>
-				<li><a href="#" class="tab" data-target=".email__body--html">HTML</a></li>
+				<li><a href="#" class="tab active" data-target=".email__body--html">HTML</a></li>
+				<li><a href="#" class="tab" data-target=".email__body--raw-html">Raw HTML</a></li>
+				<li><a href="#" class="tab" data-target=".email__body--text">Plain Text</a></li>
 				<li><a href="#" class="tab" data-target=".email__attachments">Attachments</a></li>
 			</ul>
 			<div class="tabs__panes">
-				<div class="email__body--text">
+				<div class="tab_pane email__body--html">
 					<p>
-						{{ message.body }}<br>
+					{% if html_body %}
+						{{ html_body|safe }}
+					{% endif %}
 					</p>
 				</div>
-				<div class="email__body--html">
-					{% if message.alternatives %}
-						{{ message.alternatives.0.0|safe }}
-					{% endif %}
+				<div class="tab_pane email__body--raw-html">
+					<pre>{% if html_body %}{{ html_body }}{% endif %}</pre>
 				</div>
-				<div class="email__attachments">
-					{% for attachment in attachments %}
-
-					file: <a href="{% url 'mail_viewer_attachment' message_id=lookup_id attachment=forloop.counter0 %}">{{ attachment.0 }}</a><br>
-					content-type: {{ attachment.2 }}<br>
-					{% empty %}
-						<p>No attachments</p>
-					{% endfor %}
+        <div class="tab_pane email__body--text">
+          <p>
+            {{ text_body }}<br>
+          </p>
+        </div>
+				<div class="tab_pane email__attachments">
+					<ul>
+						{% for attachment in attachments %}
+							<li>
+								<p>
+									file: <a href="{% url 'mail_viewer_attachment' message_id=lookup_id attachment=forloop.counter0 %}">{{ attachment.0 }}</a><br>
+									content-type: {{ attachment.2 }}<br>
+								</p>
+							</li>
+						{% empty %}
+							<li>
+								<p>No attachments</p>
+							</li>
+						{% endfor %}
+					</ul>
 				</div>
 			</div>
 		</div>

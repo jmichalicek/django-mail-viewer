@@ -63,8 +63,17 @@ class EmailDetailView(TemplateView):
 
     def get_context_data(self, **kwargs):
         lookup_id, message, headers = self.get_message()
+
+        text_body = message.body.strip()
+        html_body = None
+        for alternative in message.alternatives:
+            if alternative[1].lower() == 'text/html':
+                html_body = alternative[0].strip()
+                break
         return super(EmailDetailView, self).get_context_data(lookup_id=lookup_id,
                                                              message=message,
+                                                             text_body=text_body,
+                                                             html_body=html_body,
                                                              headers=headers,
                                                              attachments=message.attachments,
                                                              **kwargs)
