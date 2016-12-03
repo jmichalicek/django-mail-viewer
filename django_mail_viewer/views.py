@@ -35,7 +35,7 @@ class EmailListView(TemplateView):
                 m = mail.EmailMultiAlternatives('HTML Mail Subject', 'html email text', 'test@example.com',
                         ['to1@example.com', 'to2.example.com'],
                         connection=connection)
-                m.attach_alternative('<html><body><p style="background-color: AABBFF; color: white">HTML Email Content</p></body></html>', 'text/html')
+                m.attach_alternative('<html><body><p style="background-color: #AABBFF; color: white">HTML Email Content</p></body></html>', 'text/html')
                 current_dir = os.path.dirname(__file__)
                 test_file_attachment = os.path.join(current_dir, 'icon_e_confused.gif')
                 m.attach_file(test_file_attachment)
@@ -64,6 +64,8 @@ class EmailDetailView(TemplateView):
     def get_context_data(self, **kwargs):
         lookup_id, message, headers = self.get_message()
 
+        outbox = mail.outbox[:]
+
         text_body = message.body.strip()
         html_body = None
         for alternative in message.alternatives:
@@ -76,6 +78,7 @@ class EmailDetailView(TemplateView):
                                                              html_body=html_body,
                                                              headers=headers,
                                                              attachments=message.attachments,
+                                                             outbox=outbox,
                                                              **kwargs)
 
 class EmailAttachmentDownloadView(View):

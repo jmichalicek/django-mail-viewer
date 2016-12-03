@@ -1,7 +1,10 @@
+{% extends 'mail_viewer/base.html' %}
+
 {% load mail_viewer_tags %}
 <html>
 <head>
-	<title>Django Mail Viewer - Email Detail</title>
+	<title>{% block 'title' %}Django Mail Viewer - Email Detail{% endblock 'title' %}</title>
+	{% block 'css' %}
 	<style>
 		.email__attachments {
 			margin: 5px 0;
@@ -42,8 +45,10 @@
 			clear:both;
 		}
 	</style>
+	{% endblock 'css' %}
 </head>
 <body>
+	{% block 'main_content' %}
 	<div>
 		<div class="header_info">
 			<h3>{{ headers.subject }}</h3>
@@ -64,11 +69,7 @@
 			</ul>
 			<div class="tabs__panes">
 				<div class="tab_pane email__body--html">
-					<p>
-					{% if html_body %}
-						{{ html_body|safe }}
-					{% endif %}
-					</p>
+					<iframe srcdoc="{{ html_body }}"></iframe>
 				</div>
 				<div class="tab_pane email__body--raw-html">
 					<pre>{% if html_body %}{{ html_body }}{% endif %}</pre>
@@ -121,5 +122,6 @@
 			}
 		})();
 	</script>
+	{% endblock 'main_content' %}
 </body>
 </html>
