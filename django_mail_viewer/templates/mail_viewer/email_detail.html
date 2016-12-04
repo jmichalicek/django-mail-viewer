@@ -44,6 +44,15 @@
 			display:table;
 			clear:both;
 		}
+
+		.tab_pane.email__body--html > iframe {
+			width: 100%;
+			height: auto;
+			border: none;
+		}
+		.tab_pane.email__body--text, .tab_pane.email__body--raw-html {
+			padding: 5px 5px;
+		}
 	</style>
 	{% endblock 'css' %}
 </head>
@@ -69,7 +78,7 @@
 			</ul>
 			<div class="tabs__panes">
 				<div class="tab_pane email__body--html">
-					<iframe srcdoc="{{ html_body }}"></iframe>
+					<iframe srcdoc="{{ html_body }}" sandbox></iframe>
 				</div>
 				<div class="tab_pane email__body--raw-html">
 					<pre>{% if html_body %}{{ html_body }}{% endif %}</pre>

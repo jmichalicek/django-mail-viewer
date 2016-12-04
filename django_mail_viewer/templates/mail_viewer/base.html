@@ -4,7 +4,7 @@
 		<title>{% block 'title' %}Django Mail Viewer - Email List{% endblock 'title' %}</title>
 		<style>
 			body {
-				margin: 0 30px;
+				margin: 10 30px 0;
 				padding: 0;
 			}
 			.email_list {
@@ -12,21 +12,31 @@
 				width: 20%;
 				padding: 0 0 0;
 				height: 100%;
+				border-top: 1px solid black;
+			  border-left: 1px solid black;
+				border-bottom: 1px solid black;
+				margin: 0;
+				overflow: auto;
 			}
 			.email_list > ul {
+				margin: 0;
 				list-style: none;
-				margin-top: 10px;
+				width: 100%;
+				padding: 0;
 			}
 			.email_list--list_item {
-				border: 1px solid black;
+				border-top: none;
+				border-bottom: 1px solid black;
 				margin: 0 0 2px;
 				padding: 10px 5px;
+				width: 100%:
 			}
 			#main {
 				float: left;
 				width: 70%;
-				padding: 10px 10px 0;
-        height: calc(100% - 20px);
+				height: 100%;
+				padding: 0 10px 0;
+				border: 1px solid black;
 			}
 		</style>
 		{% block 'css' %}{% endblock 'css' %}
@@ -53,9 +63,7 @@
 			{% endblock 'email_list' %}
 			{% block 'main' %}
 				<div id="main">
-					{% block 'main_content' %}
-						<iframe name="email_detail_iframe"></iframe>
-					{% endblock 'main_content' %}
+					{% block 'main_content' %}{% endblock 'main_content' %}
 				</div>
 			{% endblock 'main' %}
 		{% endblock 'body' %}
