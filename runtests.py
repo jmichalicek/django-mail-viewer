@@ -29,7 +29,8 @@ try:
                  'context_processors': []
                  }
              }
-        ]
+        ],
+        EMAIL_BACKEND='django_mail_viewer.backends.locmem.EmailBackend'
     )
 
     try:
