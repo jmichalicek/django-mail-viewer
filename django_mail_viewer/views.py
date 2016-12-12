@@ -18,32 +18,9 @@ class EmailListView(TemplateView):
         # TODO: need to make a custom backend which sets a predictable message-id header.
         # built in locmem uses a random number each time the message is accessed
         # preventing lookup in the detail view
-        with mail.get_connection('django_mail_viewer.backends.locmem.EmailBackend') as connection:
-            if hasattr(mail, 'outbox'):
-                # TODO: remove this
-                mail.outbox = []
-                ### TEMP FAKE STUFF JUST TO SEE IT WORK
-
-                mail.send_mail(
-                        "testing subject",
-                        "Hey there!",
-                        "test@example.com",
-                        ['to1@example.com', 'to2.example.com'],
-                        html_message='<html><body>Hey, there HTML!</body></html>',
-                        connection=connection)
-
-                m = mail.EmailMultiAlternatives('HTML Mail Subject', 'html email text', 'test@example.com',
-                        ['to1@example.com', 'to2.example.com'],
-                        connection=connection)
-                m.attach_alternative('<html><body><p style="background-color: #AABBFF; color: white">HTML Email Content</p></body></html>', 'text/html')
-                current_dir = os.path.dirname(__file__)
-                test_file_attachment = os.path.join(current_dir, 'icon_e_confused.gif')
-                m.attach_file(test_file_attachment)
-                m.send()
-                # TODO: attachment
-                #### END
-                # locmem backend
-                outbox  = mail.outbox[:]
+        with mail.get_connection() as connection:
+            # add a backend.get_outbox() for supporting multiple backends?
+            outbox  = mail.outbox[:]
         return super(EmailListView, self).get_context_data(outbox=outbox, **kwargs)
 
 
@@ -54,7 +31,7 @@ class EmailDetailView(TemplateView):
     template_name = 'mail_viewer/email_detail.html'
 
     def get_message(self):
-        with mail.get_connection('django_mail_viewer.backends.locmem.EmailBackend') as connection:
+        with mail.get_connection() as connection:
             message_id = self.kwargs.get('message_id')
             message = connection.get_message(message_id)
             if message:
@@ -72,6 +49,7 @@ class EmailDetailView(TemplateView):
             if alternative[1].lower() == 'text/html':
                 html_body = alternative[0].strip()
                 break
+
         return super(EmailDetailView, self).get_context_data(lookup_id=lookup_id,
                                                              message=message,
                                                              text_body=text_body,
@@ -87,7 +65,7 @@ class EmailAttachmentDownloadView(View):
     """
 
     def get_message(self):
-        with mail.get_connection('django_mail_viewer.backends.locmem.EmailBackend') as connection:
+        with mail.get_connection() as connection:
             message_id = self.kwargs.get('message_id')
             message = connection.get_message(message_id)
             if message:
