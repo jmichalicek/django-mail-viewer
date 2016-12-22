@@ -46,7 +46,8 @@
 			{% block 'email_list' %}
 				<div class="email_list">
 					<ul>
-						{% for lookup_id, message, headers in outbox %}
+						{% for message, mime_message in outbox %}
+						{% message_lookup_id mime_message as lookup_id %}
 							<li>
 								<a href="{% url 'mail_viewer_detail' lookup_id %}">
 									<div class="email_list--list_item">

@@ -5,6 +5,7 @@ from __future__ import absolute_import, unicode_literals, print_function, divisi
 
 from django.core import mail
 from django.core.mail.backends.base import BaseEmailBackend
+from django.utils import six
 
 
 class EmailBackend(BaseEmailBackend):
@@ -31,14 +32,21 @@ class EmailBackend(BaseEmailBackend):
         msg_count = 0
         for message in messages:
             m = message.message()
-            lookup_id = m.get('Message-ID').strip('<>')
-            mail.outbox.append((lookup_id, message, m))
+            lookup_id = m.get('Message-ID').strip(u'<>')
+            mail.outbox.append((message, m))
             msg_count += 1
         return msg_count
 
     def get_message(self, lookup_id):
         for message in mail.outbox:
-            if message[0] == lookup_id:
+            # if a user is manually passing in Message-ID in extra_headers and capitalizing it
+            # differently than the expected Message-ID,  which is suppored by
+            # EmailMessage.message(), then we can't just access the key directly.  Instead iterate
+            # over the keys and vls
+            if message[1].get('message-id') == '<%s>' % lookup_id:
                 return message
+            #for k, v in six.iteritems(message[1]):
+            #    if k.lower() == 'message-id' and '<%s>' % v  == lookup_id:
+            #        return message
         return None
 

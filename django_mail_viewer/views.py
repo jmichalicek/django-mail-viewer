@@ -39,7 +39,8 @@ class EmailDetailView(TemplateView):
         raise Http404('Message id not found')
 
     def get_context_data(self, **kwargs):
-        lookup_id, message, headers = self.get_message()
+        lookup_id = kwargs.get('message_id')
+        message, mime_message = self.get_message()
 
         outbox = mail.outbox[:]
 
@@ -54,7 +55,7 @@ class EmailDetailView(TemplateView):
                                                              message=message,
                                                              text_body=text_body,
                                                              html_body=html_body,
-                                                             headers=headers,
+                                                             mime_message=mime_message,
                                                              attachments=message.attachments,
                                                              outbox=outbox,
                                                              **kwargs)
@@ -81,7 +82,7 @@ class EmailAttachmentDownloadView(View):
             raise Http404('Attachment not found')
 
     def get(self, request, *args, **kwargs):
-        lookup_id, message, headers = self.get_message()
+        message, mime_message = self.get_message()
         attachment = self.get_attachment(message) 
         response = HttpResponse(attachment[1], content_type=attachment[2])
         response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(attachment[0])

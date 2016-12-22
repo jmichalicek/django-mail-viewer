@@ -12,6 +12,7 @@
 		.tab_pane {
 			border: 1px solid black;
 			margin: 0 auto;
+			padding-right: 1px;
 		}
 		.tabs {
 			list-style: none;
@@ -60,14 +61,14 @@
 	{% block 'main_content' %}
 	<div>
 		<div class="header_info">
-			<h3>{{ headers.subject }}</h3>
-			From: {{ headers.from }};<br>
+			<h3>{{ mime_message.subject }}</h3>
+			From: {{ mime_message.from }};<br>
 			To: {% for email in  message.recipients %}{{ email }};{% endfor %}<br>
 			CC: {% for email in message.cc %}{{ email }};{% endfor %}<br>
 			BCC: {% for email in message.bcc %}{{ email }};{% endfor %}<br>
-			Sent on: {{ headers.date }}<br>
-			Content-Type: {% header_from_dict headers 'Content-Type' %}<br>
-			Message-ID: {% header_from_dict headers 'Message-ID' %}<br>
+			Sent on: {{ mime.date }}<br>
+			Content-Type: {% display_message_attribute mime_message 'Content-Type' %}<br>
+			Message-ID: {% display_message_attribute mime_message 'Message-ID' %}<br>
 		</div>
 		<div class="email__body">
 			<ul class="tabs">
