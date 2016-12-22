@@ -16,8 +16,6 @@ def message_attribute(message, attribute):
     a hyphen in the name.  In a template, message.message-id, for example does
     not work due to the hyphen.
     """
-    print('message is %s' % message)
-    print('message tyupe is %s' % type(message))
     return message.get(attribute)
 
 
