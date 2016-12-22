@@ -1,24 +1,34 @@
 {% extends 'mail_viewer/base.html' %}
 
 {% load mail_viewer_tags %}
-<html>
-<head>
-	<title>{% block 'title' %}Django Mail Viewer - Email Detail{% endblock 'title' %}</title>
-	{% block 'css' %}
-	<style>
+{% block 'title' %}Django Mail Viewer - Email Detail{% endblock 'title' %}
+{% block 'css' %}
+<style>
+  body {height: 100%; margin: 0 5px}
+  html {height: 100%}
+		.header_info {
+			height: 175px;
+			margin-left: 10px;
+		}
+		.email__body {
+			height: calc(100% - 175px);
+		}
 		.email__attachments {
 			margin: 5px 0;
 		}
 		.tab_pane {
-			border: 1px solid black;
+			border: none;
 			margin: 0 auto;
+			height: 100%;
 			padding-right: 1px;
+			overflow: scroll;
 		}
 		.tabs {
 			list-style: none;
 			padding: 0;
 			margin: 10px 0 0;
 			border-bottom: none;
+			height: 27px;
 		}
 
 		.tabs li { display: inline; }
@@ -46,20 +56,31 @@
 			clear:both;
 		}
 
+		.tabs__panes {
+			height: calc(100% - 37px);
+			border: 1px solid black;
+			border-left: none;
+			border-right: none;
+			border-bottom: none;
+		}
+
 		.tab_pane.email__body--html > iframe {
 			width: 100%;
-			height: auto;
+			height: 100%;
 			border: none;
+			margin-bottom: 1px;
 		}
 		.tab_pane.email__body--text, .tab_pane.email__body--raw-html {
 			padding: 5px 5px;
 		}
+
+		.wrapper {
+			height: 100%;
+		}
 	</style>
 	{% endblock 'css' %}
-</head>
-<body>
 	{% block 'main_content' %}
-	<div>
+	<div class="wrapper">
 		<div class="header_info">
 			<h3>{{ mime_message.subject }}</h3>
 			From: {{ mime_message.from }};<br>

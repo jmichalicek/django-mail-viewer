@@ -3,9 +3,14 @@
 	<head>
 		<title>{% block 'title' %}Django Mail Viewer - Email List{% endblock 'title' %}</title>
 		<style>
+			html { height: 100%; }
 			body {
-				margin: 10 30px 0;
+				height: 100%;
+				margin: 0 10px 0;
 				padding: 0;
+			}
+			h3 {
+				margin: 0;
 			}
 			.email_list {
 				float: left;
@@ -35,7 +40,7 @@
 				float: left;
 				width: 70%;
 				height: 100%;
-				padding: 0 10px 0;
+				padding: 0;
 				border: 1px solid black;
 			}
 		</style>
