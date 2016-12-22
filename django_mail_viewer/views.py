@@ -20,7 +20,7 @@ class EmailListView(TemplateView):
         # preventing lookup in the detail view
         with mail.get_connection() as connection:
             # add a backend.get_outbox() for supporting multiple backends?
-            outbox  = mail.outbox[:]
+            outbox  = connection.get_outbox() 
         return super(EmailListView, self).get_context_data(outbox=outbox, **kwargs)
 
 
@@ -42,7 +42,8 @@ class EmailDetailView(TemplateView):
         lookup_id = kwargs.get('message_id')
         message, mime_message = self.get_message()
 
-        outbox = mail.outbox[:]
+        with mail.get_connection() as connection:
+            outbox = connection.get_outbox() 
 
         text_body = message.body.strip()
         html_body = None

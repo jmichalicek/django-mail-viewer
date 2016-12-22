@@ -33,11 +33,16 @@ class EmailBackend(BaseEmailBackend):
         for message in messages:
             m = message.message()
             lookup_id = m.get('Message-ID').strip(u'<>')
+            # we could just store m, all of the data is duplicated from message and
+            # it is the actual sent message.
             mail.outbox.append((message, m))
             msg_count += 1
         return msg_count
 
     def get_message(self, lookup_id):
+        """
+        Look up and return a specific message in the outbox
+        """
         for message in mail.outbox:
             # if a user is manually passing in Message-ID in extra_headers and capitalizing it
             # differently than the expected Message-ID,  which is suppored by
@@ -45,8 +50,11 @@ class EmailBackend(BaseEmailBackend):
             # over the keys and vls
             if message[1].get('message-id') == '<%s>' % lookup_id:
                 return message
-            #for k, v in six.iteritems(message[1]):
-            #    if k.lower() == 'message-id' and '<%s>' % v  == lookup_id:
-            #        return message
         return None
 
+    def get_outbox(self, *args, **kwargs):
+        """
+        Get the outbox used by this backend.  This backend returns a copy of mail.outbox.
+        May add pagination args/kwargs.
+        """
+        return getattr(mail, 'outbox', [])[:]
