@@ -40,7 +40,8 @@ setup(
     url='https://github.com/jmichalicek/django-mail-viewer',
     packages=[
         'django_mail_viewer',
-        'django_mail_viewer.backends'
+        'django_mail_viewer.backends',
+        'django_mail_viewer.templatetags',
     ],
     include_package_data=True,
     install_requires=[],
