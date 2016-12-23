@@ -21,6 +21,13 @@ Add Django Mail Viewer's URL patterns:
 
     urlpatterns = [
         ...
-        url(r'^', include(django_mail_viewer_urls)),
+        url(r'^mailviewer/', include(django_mail_viewer_urls)),
         ...
     ]
+
+Set your `EMAIL_BACKEND` in settings.py:
+
+.. code-block:: python
+
+    EMAIL_BACKEND = 'django_mail_viewer.backends.locmem.EmailBackend'
+
