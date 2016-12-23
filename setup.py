@@ -46,7 +46,7 @@ setup(
     install_requires=[],
     license="MIT",
     zip_safe=False,
-    keywords='django-mail-viewer' 'django', 'email',
+    keywords=['django-mail-viewer', 'django', 'email',],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Framework :: Django',
