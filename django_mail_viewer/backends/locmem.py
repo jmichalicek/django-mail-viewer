@@ -32,10 +32,9 @@ class EmailBackend(BaseEmailBackend):
         msg_count = 0
         for message in messages:
             m = message.message()
-            lookup_id = m.get('Message-ID').strip(u'<>')
             # we could just store m, all of the data is duplicated from message and
             # it is the actual sent message.
-            mail.outbox.append((message, m))
+            mail.outbox.append(m)
             msg_count += 1
         return msg_count
 
@@ -48,7 +47,7 @@ class EmailBackend(BaseEmailBackend):
             # differently than the expected Message-ID,  which is suppored by
             # EmailMessage.message(), then we can't just access the key directly.  Instead iterate
             # over the keys and vls
-            if message[1].get('message-id') == lookup_id:
+            if message.get('message-id') == lookup_id:
                 return message
         return None
 

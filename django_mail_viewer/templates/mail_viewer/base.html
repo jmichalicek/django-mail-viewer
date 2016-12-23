@@ -51,15 +51,19 @@
 			{% block 'email_list' %}
 				<div class="email_list">
 					<ul>
-						{% for message, mime_message in outbox %}
-						{% message_lookup_id mime_message as lookup_id %}
+						{% for message  in outbox %}
+							{% message_lookup_id message as lookup_id %}
+							{% message_attribute message 'subject' as subject %}
+							{% message_attribute message 'from' as sender %}
+							{% message_attribute message 'to' as recipient %}
+							{% message_attribute message 'date' as sent_date %}
 							<li>
 								<a href="{% url 'mail_viewer_detail' lookup_id %}">
 									<div class="email_list--list_item">
-										{{ message.subject }}<br>
-										From: {{ message.from }}<br>
-										To: {% for r in message.recipients %}{{ r }}; {% endfor %}<br>
-										Sent: {{ headers.date }}
+										{{ subject }}<br>
+										From: {{ sender }}<br>
+										To: {{ recipient }}<br>
+										Sent: {{ sent_date }}
 									</div>
 								</a>
 							</li>
