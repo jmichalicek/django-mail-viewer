@@ -40,12 +40,13 @@ setup(
     url='https://github.com/jmichalicek/django-mail-viewer',
     packages=[
         'django_mail_viewer',
+        'django_mail_viewer.backends'
     ],
     include_package_data=True,
     install_requires=[],
     license="MIT",
     zip_safe=False,
-    keywords='django-mail-viewer',
+    keywords='django-mail-viewer' 'django', 'email',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Framework :: Django',
@@ -58,8 +59,6 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
