@@ -17,11 +17,9 @@ class LocMemBackendTest(TestCase):
     def setUp(self):
         mail.outbox = []
 
-    def test_send_messages_adds_tuple_to_mail_outbox(self):
+    def test_send_messages_adds_message_to_mail_outbox(self):
         """
-        send_messages() method should append a tuple to mail.outbox with
-        the message_id from the headers, the EMailMessage object, and the message
-        dict which is the headers and data actually sent.
+        send_messages() method should append the sent email.Message to mail.outbox 
         """
 
         m = mail.EmailMultiAlternatives(
@@ -31,8 +29,6 @@ class LocMemBackendTest(TestCase):
             self.assertEqual([], mail.outbox)
             self.assertEqual(1, connection.send_messages([m]))
             self.assertEqual(1, len(mail.outbox))
-            self.assertEqual(2, len(mail.outbox[0]))
-            self.assertEqual(m, mail.outbox[0][0])
 
     def test_get_message_returns_requested_message(self):
 
@@ -48,4 +44,4 @@ class LocMemBackendTest(TestCase):
             self.assertEqual(2, len(mail.outbox))
             for message in mail.outbox:
                 # check that we can use the message id to look up a specific message's data
-                self.assertEqual(message, connection.get_message(message[1]['Message-ID']))
+                self.assertEqual(message, connection.get_message(message.get('Message-ID')))

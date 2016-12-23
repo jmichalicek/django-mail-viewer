@@ -82,14 +82,14 @@
 	{% block 'main_content' %}
 	<div class="wrapper">
 		<div class="header_info">
-			<h3>{{ mime_message.subject }}</h3>
-			From: {{ mime_message.from }};<br>
-			To: {% for email in  message.recipients %}{{ email }};{% endfor %}<br>
-			CC: {% for email in message.cc %}{{ email }};{% endfor %}<br>
-			BCC: {% for email in message.bcc %}{{ email }};{% endfor %}<br>
-			Sent on: {{ mime.date }}<br>
-			Content-Type: {% display_message_attribute mime_message 'Content-Type' %}<br>
-			Message-ID: {% display_message_attribute mime_message 'Message-ID' %}<br>
+			<h3>{{ subject }}</h3>
+			From: {{ sender }};<br>
+			To: {{ to }}<br>
+			CC: {{ message.cc }}<br>
+			BCC: {{  message.bcc  }}<br>
+			Sent on: {{ message.date }}<br>
+			Content-Type: {% display_message_attribute message 'Content-Type' %}<br>
+			Message-ID: {% display_message_attribute message 'Message-ID' %}<br>
 		</div>
 		<div class="email__body">
 			<ul class="tabs">
@@ -115,8 +115,8 @@
 						{% for attachment in attachments %}
 							<li>
 								<p>
-									file: <a href="{% url 'mail_viewer_attachment' message_id=lookup_id attachment=forloop.counter0 %}">{{ attachment.0 }}</a><br>
-									content-type: {{ attachment.2 }}<br>
+									file: <a href="{% url 'mail_viewer_attachment' message_id=lookup_id attachment=forloop.counter0 %}">{{ attachment.filename }}</a><br>
+									content-type: {{ attachment.content_type }}<br>
 								</p>
 							</li>
 						{% empty %}

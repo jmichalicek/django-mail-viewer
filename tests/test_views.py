@@ -39,8 +39,8 @@ class EmailListViewTest(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(mail.outbox, response.context['outbox'])
         self.assertEqual(2, len(mail.outbox))
-        self.assertEqual(response.context['outbox'][0][0].subject, 'Email 1 subject')
-        self.assertEqual(response.context['outbox'][1][0].subject, 'Email 2 subject')
+        self.assertEqual(response.context['outbox'][0].get('subject'), 'Email 1 subject')
+        self.assertEqual(response.context['outbox'][1].get('subject'), 'Email 2 subject')
 
     def test_get_with_empty_list_has_200_response(self):
         mail.outbox = []
@@ -54,7 +54,7 @@ class EmailDetailViewTest(TestCase):
 
     def _get_detail_url(self, message_id=None):
         if not message_id:
-            message_id = mail.outbox[0][1].get(u'message-id')
+            message_id = mail.outbox[0].get(u'message-id')
             message_id = message_id.strip(u'<>')
         return reverse(self.URL_NAME, args=[message_id])
 
@@ -69,7 +69,7 @@ class EmailDetailViewTest(TestCase):
 
         response = self.client.get(self._get_detail_url())
         self.assertEqual(200, response.status_code)
-        expected_context = ['message', 'text_body', 'html_body', 'mime_message', 'attachments', 'lookup_id', 'outbox']
+        expected_context = ['message', 'text_body', 'html_body',  'attachments', 'lookup_id', 'outbox']
         for x in expected_context:
             self.assertTrue(x in response.context)
 
@@ -86,18 +86,18 @@ class EmailDetailViewTest(TestCase):
         m.attach_file(test_file_attachment)
         m.send()
 
-        message_id = mail.outbox[0][1].get('message-id').strip(u'<>')
-        response = self.client.get(self._get_detail_url(message_id))
+        message_id = mail.outbox[0].get('message-id')
+        response = self.client.get(self._get_detail_url(message_id.strip(u'<>')))
         self.assertEqual(200, response.status_code)
 
-        self.assertEqual(message_id, response.context['lookup_id'])
         self.assertEqual('Email 2 text', response.context['text_body'])
         self.assertEqual('<html><body><p style="background-color: #AABBFF; color: white">Email 2 HTML</p></body></html>',
                          response.context['html_body'])
-        self.assertEqual(m.attachments, response.context['attachments'])
-        self.assertEqual(mail.outbox[0][1], response.context['mime_message'])
+        self.assertEqual([{'filename': 'icon.gif', 'content_type': 'image/gif', 'file': None}], response.context['attachments'])
+        self.assertEqual(mail.outbox[0], response.context['message'])
         self.assertEqual(mail.outbox, response.context['outbox'])
-        self.assertEqual(m, response.context['message'])
+        self.assertEqual(response.context['lookup_id'], message_id.strip(u'<>'))
+
 
 @override_settings(EMAIL_BACKEND='django_mail_viewer.backends.locmem.EmailBackend')
 class EmailAttachmentDownloadViewTest(TestCase):
@@ -118,7 +118,7 @@ class EmailAttachmentDownloadViewTest(TestCase):
         m.attach_file(test_file_attachment, 'image/gif')
         m.send()
 
-        message_id = mail.outbox[0][1].get('message-id').strip(u'<>')
+        message_id = mail.outbox[0].get('message-id').strip(u'<>')
         response = self.client.get(reverse(self.URL_NAME, args=[message_id, 0]))
         self.assertEqual(200, response.status_code)
         self.assertEqual('image/gif', response['Content-Type'])
