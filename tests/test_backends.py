@@ -48,4 +48,4 @@ class LocMemBackendTest(TestCase):
             self.assertEqual(2, len(mail.outbox))
             for message in mail.outbox:
                 # check that we can use the message id to look up a specific message's data
-                self.assertEqual(message, connection.get_message(message[1]['Message-ID'].strip('<>')))
+                self.assertEqual(message, connection.get_message(message[1]['Message-ID']))

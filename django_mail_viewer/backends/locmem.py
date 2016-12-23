@@ -48,7 +48,7 @@ class EmailBackend(BaseEmailBackend):
             # differently than the expected Message-ID,  which is suppored by
             # EmailMessage.message(), then we can't just access the key directly.  Instead iterate
             # over the keys and vls
-            if message[1].get('message-id') == '<%s>' % lookup_id:
+            if message[1].get('message-id') == lookup_id:
                 return message
         return None
 

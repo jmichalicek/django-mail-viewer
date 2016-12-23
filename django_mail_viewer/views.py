@@ -33,7 +33,7 @@ class EmailDetailView(TemplateView):
     def get_message(self):
         with mail.get_connection() as connection:
             message_id = self.kwargs.get('message_id')
-            message = connection.get_message(message_id)
+            message = connection.get_message(u'<%s>' % message_id)
             if message:
                 return message
         raise Http404('Message id not found')
@@ -69,7 +69,7 @@ class EmailAttachmentDownloadView(View):
     def get_message(self):
         with mail.get_connection() as connection:
             message_id = self.kwargs.get('message_id')
-            message = connection.get_message(message_id)
+            message = connection.get_message(u'<%s>' % message_id)
             if message:
                 return message
         raise Http404('Message id not found')
