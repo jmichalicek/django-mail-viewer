@@ -3,8 +3,9 @@ Test django_mail_viewer.backends
 """
 from __future__ import division, absolute_import, unicode_literals
 
-from django.core import mail
-from django.test import TestCase
+from django.conf import settings
+from django.core import cache, mail
+from django.test import TestCase, override_settings
 
 import os
 
@@ -45,3 +46,24 @@ class LocMemBackendTest(TestCase):
             for message in mail.outbox:
                 # check that we can use the message id to look up a specific message's data
                 self.assertEqual(message, connection.get_message(message.get('Message-ID')))
+
+
+class CacheBackendTest(TestCase):
+    """
+    Test django_mail_viewer.backends.cache.EmailBackend
+    """
+
+    def setUp(self):
+        # not sure this is the best way to do this, but it'll work for now
+        self.mail_cache = cache.caches[settings.MAILVIEWER_CACHE]
+        self.mail_cache.clear()
+
+    def test_send_messages_adds_message_to_cache(self):
+        m = mail.EmailMultiAlternatives(
+                'Email 2 subject', 'Email 2 text', 'test@example.com',
+                ['to1@example.com', 'to2.example.com'])
+        with mail.get_connection('django_mail_viewer.backends.cache.EmailBackend') as connection:
+            self.mail_cache.delete(connection.cache_keys_key)
+            self.assertIsNone(self.mail_cache.get(connection.get_outbox()))
+            self.assertEqual(1, connection.send_messages([m]))
+            self.assertEqual(1, len(self.mail_cache.get(connection.cache_keys_key)))

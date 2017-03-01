@@ -37,9 +37,13 @@ class EmailBackend(BaseEmailBackend):
             # things will get hung up.  May introduce a lock key and spinlock
             # to avoid clobbering the value stored in the list of keys.
             # Smarter solutions will be cache backend specific and possibly not much better
+            current_cache_keys = self.cache.get(self.cache_keys_key)
+            if not current_cache_keys:
+                current_cache_keys = []
+            current_cache_keys.append(message_id)
             self.cache.set(
                     self.cache_keys_key,
-                    self.cache.get_or_set(self.cache_keys_key, []).append(message_id)
+                    current_cache_keys
                     )
             msg_count += 1
         return msg_count
@@ -57,4 +61,9 @@ class EmailBackend(BaseEmailBackend):
         """
         # grabs all of the keys in the stored self.cache_keys_key
         # and passes those into get_many() to retrieve the keys
-        return [v for k, v in self.cache.get_many(self.cache.get(self.cache_keys_key))
+        message_keys = self.cache.get(self.cache_keys_key)
+        if message_keys:
+            messages = self.cache.get_many(message_keys).values()
+        else:
+            messages = []
+        return messages
