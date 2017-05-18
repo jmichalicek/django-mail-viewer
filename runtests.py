@@ -30,7 +30,16 @@ try:
                  }
              }
         ],
-        EMAIL_BACKEND='django_mail_viewer.backends.locmem.EmailBackend'
+        EMAIL_BACKEND='django_mail_viewer.backends.locmem.EmailBackend',
+        CACHES = {
+            'default': {
+                'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            },
+            'test_mailviewer': {
+                'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            }
+        },
+        MAILVIEWER_CACHE = 'test_mailviewer'
     )
 
     try:
