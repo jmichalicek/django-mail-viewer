@@ -1,7 +1,7 @@
 from __future__ import unicode_literals, absolute_import, division, print_function
 
 from django.core import mail
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirecte
 from django.utils.encoding import smart_str
 from django.views.generic.base import TemplateView, View
 
@@ -20,12 +20,12 @@ class SingleEmailMixin(object):
     """
 
     def get_message(self):
+        message = None
         with mail.get_connection() as connection:
             message_id = self.kwargs.get('message_id')
             message = connection.get_message(u'<%s>' % message_id)
-            if message:
-                return message
-        raise Http404('Message id not found')
+        return message
+        #raise Http404('Message id not found')
 
     def _parse_email_attachment(self, message, decode_file=True):
         """
@@ -114,9 +114,16 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
     """
     template_name = 'mail_viewer/email_detail.html'
 
+    def get(self, request, *args, **kwargs):
+        self.message = self.get_message()
+        if not self.message:
+            return HttpResponseRedirect(reverse('mail_viewer_list'))
+
+        return super(EmailDetailView, self).get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         lookup_id = kwargs.get('message_id')
-        message = self.get_message()
+        message = self.message
 
         with mail.get_connection() as connection:
             outbox = connection.get_outbox() 
