@@ -1,11 +1,10 @@
 """
 Backend for test environment.
 """
-from __future__ import absolute_import, unicode_literals, print_function, division
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.conf import settings
-from django.core import mail
-from django.core import cache
+from django.core import cache, mail
 from django.core.mail.backends.base import BaseEmailBackend
 from django.utils import six
 

@@ -1,13 +1,13 @@
 """
 Test django_mail_viewer.backends
 """
-from __future__ import division, absolute_import, unicode_literals
+from __future__ import absolute_import, division, unicode_literals
+
+import os
 
 from django.conf import settings
 from django.core import cache, mail
 from django.test import TestCase, override_settings
-
-import os
 
 
 class LocMemBackendTest(TestCase):

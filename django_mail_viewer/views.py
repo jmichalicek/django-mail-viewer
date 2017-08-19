@@ -1,16 +1,18 @@
-from __future__ import unicode_literals, absolute_import, division, print_function
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+# email parsing
+from io import BytesIO
 
 from django.core import mail
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.utils.encoding import smart_str
 from django.views.generic.base import TemplateView, View
+
 try:
     from django.core.urlresolvers import reverse
 except ImportError:
     from django.urls import reverse
 
-# email parsing
-from io import BytesIO
 
 
 class SingleEmailMixin(object):

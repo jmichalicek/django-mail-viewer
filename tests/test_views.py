@@ -1,14 +1,16 @@
-from __future__ import division, absolute_import, unicode_literals
+from __future__ import absolute_import, division, unicode_literals
+
+import os
 
 from django.core import mail
+from django.test import TestCase
+from django.test.utils import override_settings
+
 try:
     from django.core.urlresolvers import reverse
 except ImportError:
     from django.urls import reverse
-from django.test import TestCase
-from django.test.utils import override_settings
 
-import os
 
 
 @override_settings(EMAIL_BACKEND='django_mail_viewer.backends.locmem.EmailBackend')
