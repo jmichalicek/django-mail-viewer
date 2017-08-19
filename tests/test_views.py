@@ -7,7 +7,6 @@ except ImportError:
     from django.urls import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils.encoding import smart_str
 
 import os
 
@@ -28,10 +27,10 @@ class EmailListViewTest(TestCase):
 
         # email with attachment
         m = mail.EmailMultiAlternatives(
-                'Email 2 subject', 'Email 2 text', 'test@example.com',
-                ['to1@example.com', 'to2.example.com'])
+            'Email 2 subject', 'Email 2 text', 'test@example.com', ['to1@example.com', 'to2.example.com'])
         m.attach_alternative(
-                '<html><body><p style="background-color: #AABBFF; color: white">Email 2 HTML</p></body></html>', 'text/html')
+            '<html><body><p style="background-color: #AABBFF; color: white">Email 2 HTML</p></body></html>',
+            'text/html')
         current_dir = os.path.dirname(__file__)
         files_dir = os.path.join(current_dir, 'test_files')
         test_file_attachment = os.path.join(files_dir, 'icon.gif')
@@ -72,17 +71,17 @@ class EmailDetailViewTest(TestCase):
 
         response = self.client.get(self._get_detail_url())
         self.assertEqual(200, response.status_code)
-        expected_context = ['message', 'text_body', 'html_body',  'attachments', 'lookup_id', 'outbox']
+        expected_context = ['message', 'text_body', 'html_body', 'attachments', 'lookup_id', 'outbox']
         for x in expected_context:
             self.assertTrue(x in response.context)
 
     def test_get_returns_email_details(self):
         mail.outbox = []
         m = mail.EmailMultiAlternatives(
-                'Email 2 Subject', 'Email 2 text', 'test@example.com',
-                ['to1@example.com', 'to2.example.com'])
+            'Email 2 Subject', 'Email 2 text', 'test@example.com', ['to1@example.com', 'to2.example.com'])
         m.attach_alternative(
-                '<html><body><p style="background-color: #AABBFF; color: white">Email 2 HTML</p></body></html>', 'text/html')
+            '<html><body><p style="background-color: #AABBFF; color: white">Email 2 HTML</p></body></html>',
+            'text/html')
         current_dir = os.path.dirname(__file__)
         files_dir = os.path.join(current_dir, 'test_files')
         test_file_attachment = os.path.join(files_dir, 'icon.gif')
@@ -94,9 +93,11 @@ class EmailDetailViewTest(TestCase):
         self.assertEqual(200, response.status_code)
 
         self.assertEqual('Email 2 text', response.context['text_body'])
-        self.assertEqual('<html><body><p style="background-color: #AABBFF; color: white">Email 2 HTML</p></body></html>',
-                         response.context['html_body'])
-        self.assertEqual([{'filename': 'icon.gif', 'content_type': 'image/gif', 'file': None}], response.context['attachments'])
+        self.assertEqual(
+            '<html><body><p style="background-color: #AABBFF; color: white">Email 2 HTML</p></body></html>',
+            response.context['html_body'])
+        self.assertEqual(
+            [{'filename': 'icon.gif', 'content_type': 'image/gif', 'file': None}], response.context['attachments'])
         self.assertEqual(mail.outbox[0], response.context['message'])
         self.assertEqual(mail.outbox, response.context['outbox'])
         self.assertEqual(response.context['lookup_id'], message_id.strip(u'<>'))
@@ -120,10 +121,10 @@ class EmailAttachmentDownloadViewTest(TestCase):
 
     def test_get_sends_file_as_attachment(self):
         m = mail.EmailMultiAlternatives(
-                'Email 2 Subject', 'Email 2 text', 'test@example.com',
-                ['to1@example.com', 'to2.example.com'])
+            'Email 2 Subject', 'Email 2 text', 'test@example.com', ['to1@example.com', 'to2.example.com'])
         m.attach_alternative(
-                '<html><body><p style="background-color: #AABBFF; color: white">Email 2 HTML</p></body></html>', 'text/html')
+            '<html><body><p style="background-color: #AABBFF; color: white">Email 2 HTML</p></body></html>',
+            'text/html')
         current_dir = os.path.dirname(__file__)
         files_dir = os.path.join(current_dir, 'test_files')
         test_file_attachment = os.path.join(files_dir, 'icon.gif')
@@ -134,6 +135,4 @@ class EmailAttachmentDownloadViewTest(TestCase):
         response = self.client.get(reverse(self.URL_NAME, args=[message_id, 0]))
         self.assertEqual(200, response.status_code)
         self.assertEqual('image/gif', response['Content-Type'])
-        self.assertEqual(
-                'attachment; filename=icon.gif',
-                response['Content-Disposition'])
+        self.assertEqual('attachment; filename=icon.gif', response['Content-Disposition'])
