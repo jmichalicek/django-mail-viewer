@@ -10,8 +10,6 @@ Tests for `django-mail-viewer` models module.
 
 from django.test import TestCase
 
-from django_mail_viewer import models
-
 
 class TestDjango_mail_viewer(TestCase):
 

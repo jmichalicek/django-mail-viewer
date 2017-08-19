@@ -12,7 +12,6 @@ except ImportError:
     from django.urls import reverse
 
 
-
 @override_settings(EMAIL_BACKEND='django_mail_viewer.backends.locmem.EmailBackend')
 class EmailListViewTest(TestCase):
     URL_NAME = 'mail_viewer_list'

@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.core import mail
 from django.core.mail.backends.base import BaseEmailBackend
-from django.utils import six
 
 
 class EmailBackend(BaseEmailBackend):
@@ -25,15 +24,9 @@ class EmailBackend(BaseEmailBackend):
             mail.outbox = []
 
     def send_messages(self, messages):
-        # TODO: Tweak this.  If the same message object is used to multiple times it will get put in the mailbox twice
-        # but identifying which send will not be reasonable.  We also make use of headers which are calculated
-        # at runtime in EmailMessage.message() and so are not accurate when displayed.  We need to have mail.outbox
-        # store both the EmailMessage instance AND the dict returned by EmailMessage.message() perhaps as a list of tuples.
         msg_count = 0
         for message in messages:
             m = message.message()
-            # we could just store m, all of the data is duplicated from message and
-            # it is the actual sent message.
             mail.outbox.append(m)
             msg_count += 1
         return msg_count

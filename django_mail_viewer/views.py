@@ -14,7 +14,6 @@ except ImportError:
     from django.urls import reverse
 
 
-
 class SingleEmailMixin(object):
     """
     Mixin for details for a single email
@@ -52,18 +51,21 @@ class SingleEmailMixin(object):
                 else:
                     attachment = None
                 for param in dispositions[1:]:
-                    name,value = param.split("=")
+                    name, value = param.split("=")
                     name = name.lower()
 
+                    # Since I am terrible and left terrible comments I am assuming the
+                    # datetime TODO comments below mean to store as a datetime.datetime object
                     if name == "filename":
                         attachment.name = value
                     elif name == "create-date":
-                        attachment.create_date = value  #TODO: datetime
+                        attachment.create_date = value  # TODO: datetime
                     elif name == "modification-date":
-                        attachment.mod_date = value #TODO: datetime
+                        attachment.mod_date = value  # TODO: datetime
                     elif name == "read-date":
-                        attachment.read_date = value #TODO: datetime
-                return {'filename': message.get_filename(), 'content_type': message.get_content_type(), 'file': attachment}
+                        attachment.read_date = value  # TODO: datetime
+                return {
+                    'filename': message.get_filename(), 'content_type': message.get_content_type(), 'file': attachment}
         return None
 
     def _parse_email_parts(self, message, decode_files=True):
@@ -104,7 +106,7 @@ class EmailListView(TemplateView):
         # preventing lookup in the detail view
         with mail.get_connection() as connection:
             # add a backend.get_outbox() for supporting multiple backends?
-            outbox  = connection.get_outbox()
+            outbox = connection.get_outbox()
         return super(EmailListView, self).get_context_data(outbox=outbox, **kwargs)
 
 
@@ -139,6 +141,7 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
                                                              attachments=attachments,
                                                              outbox=outbox,
                                                              **kwargs)
+
 
 class EmailAttachmentDownloadView(SingleEmailMixin, View):
     """
