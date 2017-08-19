@@ -1,17 +1,16 @@
 from __future__ import unicode_literals, absolute_import, division, print_function
 
 from django.core import mail
-from django.http import Http404, HttpResponse, HttpResponseRedirecte
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.utils.encoding import smart_str
 from django.views.generic.base import TemplateView, View
-
-import os
+try:
+    from django.core.urlresolvers import reverse
+except ImportError:
+    from django.urls import reverse
 
 # email parsing
-from base64 import b64decode
-import sys
-from email.utils import parseaddr
-from io import StringIO, BytesIO
+from io import BytesIO
 
 
 class SingleEmailMixin(object):
@@ -25,7 +24,6 @@ class SingleEmailMixin(object):
             message_id = self.kwargs.get('message_id')
             message = connection.get_message(u'<%s>' % message_id)
         return message
-        #raise Http404('Message id not found')
 
     def _parse_email_attachment(self, message, decode_file=True):
         """
@@ -104,7 +102,7 @@ class EmailListView(TemplateView):
         # preventing lookup in the detail view
         with mail.get_connection() as connection:
             # add a backend.get_outbox() for supporting multiple backends?
-            outbox  = connection.get_outbox() 
+            outbox  = connection.get_outbox()
         return super(EmailListView, self).get_context_data(outbox=outbox, **kwargs)
 
 
@@ -126,7 +124,7 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
         message = self.message
 
         with mail.get_connection() as connection:
-            outbox = connection.get_outbox() 
+            outbox = connection.get_outbox()
 
         subject, text_body, html_body, sender, to, attachments = self._parse_email_parts(message, decode_files=False)
         return super(EmailDetailView, self).get_context_data(lookup_id=lookup_id,
@@ -162,7 +160,7 @@ class EmailAttachmentDownloadView(SingleEmailMixin, View):
 
     def get(self, request, *args, **kwargs):
         message = self.get_message()
-        attachment = self.get_attachment(message) 
+        attachment = self.get_attachment(message)
         response = HttpResponse(attachment['file'], content_type=attachment['content_type'])
         response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(attachment['filename'])
         return response

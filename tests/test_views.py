@@ -1,7 +1,10 @@
 from __future__ import division, absolute_import, unicode_literals
 
 from django.core import mail
-from django.core.urlresolvers import reverse
+try:
+    from django.core.urlresolvers import reverse
+except ImportError:
+    from django.urls import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.encoding import smart_str
@@ -98,6 +101,15 @@ class EmailDetailViewTest(TestCase):
         self.assertEqual(mail.outbox, response.context['outbox'])
         self.assertEqual(response.context['lookup_id'], message_id.strip(u'<>'))
 
+    def test_missing_email_redirect_to_list(self):
+        """
+        If a missing email id is given, rather than 404, this should just redirect back to the list view
+        for ease of use.
+        """
+        mail.outbox = []
+        response = self.client.get(self._get_detail_url('fake-message-id'))
+        self.assertRedirects(response, reverse('mail_viewer_list'))
+
 
 @override_settings(EMAIL_BACKEND='django_mail_viewer.backends.locmem.EmailBackend')
 class EmailAttachmentDownloadViewTest(TestCase):
@@ -125,4 +137,3 @@ class EmailAttachmentDownloadViewTest(TestCase):
         self.assertEqual(
                 'attachment; filename=icon.gif',
                 response['Content-Disposition'])
-
