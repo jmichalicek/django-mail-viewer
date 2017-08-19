@@ -79,14 +79,15 @@ class SingleEmailMixin(object):
             if attachment:
                 attachments.append(attachment)
             elif part.get_content_type() == 'text/plain':
-                if body is None:
-                    body = ''
-                # maybe should deal with charset as the original code does
-                body += u'%s' % (part.get_payload(decode=False))
+                # should we get the default charset from the system if no charset?
+                # decode=True handles quoted printable and base64 encoded data
+                charset = part.get_param('charset')
+                body = part.get_payload(decode=True).decode(charset, errors='replace')
             elif part.get_content_type() == 'text/html':
-                if html is None:
-                    html = ''
-                html += u'%s' % part.get_payload(decode=False)
+                # original code set html to '' if it was None and then appended
+                # as if we might have multiple html parts which are just one html message?
+                charset = part.get_param('charset')
+                html = part.get_payload(decode=True).decode(charset, errors='replace')
 
         subject = message.get('subject')
         msg_from = message.get('from')
