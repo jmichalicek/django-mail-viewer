@@ -1,7 +1,9 @@
 coverage==4.2
 mock>=1.0.1
 flake8>=2.1.0
-#tox>=1.7.0
+# should not need this here, which causes it to install into each
+# tox env on travisci, but travisci is not liking installing tox separately
+tox>=1.7.0
 
 
 # Additional test requirements go here
