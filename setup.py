@@ -3,10 +3,8 @@
 import os
 import sys
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, find_packages
+
 
 version = '0.1.0'
 
@@ -38,29 +36,26 @@ setup(
     author='Justin Michalicek',
     author_email='jmichalicek@gmail.com',
     url='https://github.com/jmichalicek/django-mail-viewer',
-    packages=[
-        'django_mail_viewer',
-        'django_mail_viewer.backends',
-        'django_mail_viewer.templatetags',
-    ],
+    packages=find_packages(exclude=['tests', 'docs']),
     include_package_data=True,
     install_requires=[],
     license="MIT",
     zip_safe=False,
-    keywords=['django-mail-viewer', 'django', 'email',],
+    keywords=['django-mail-viewer', 'django', 'email', ],
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Framework :: Django',
-        'Framework :: Django :: 1.8',
         'Framework :: Django :: 1.9',
         'Framework :: Django :: 1.10',
+        'Framework :: Django :: 1.11',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
 )
