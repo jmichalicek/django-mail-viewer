@@ -6,6 +6,7 @@ History
 Current
 +++++++
 * Dropped testing of Django 1.8, 1.9 and 1.10
+* Stopped using assignment_tag in favor of Django 1.9+ simple_tag functionality, definitely breaking Django 1.8
 * Added testing of Django 2.0
 * Updated .editorconfig, added flake8 check, isort, and yapf checks and configs
 
