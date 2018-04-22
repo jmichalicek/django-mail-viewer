@@ -2,7 +2,6 @@ from __future__ import absolute_import, division, unicode_literals
 
 import os
 
-from django.conf import settings
 from django.core import mail
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -20,16 +19,12 @@ class EmailListViewTest(TestCase):
     def test_get_returns_email_list(self):
         mail.outbox = []
 
-        mail.send_mail(
-            "Email 1 subject",
-            "Email 1 text",
-            "test@example.com",
-            ['to1@example.com', 'to2.example.com'],
-            html_message='<html><body>Email 1 HTML</body></html>')
+        mail.send_mail("Email 1 subject", "Email 1 text", "test@example.com", ['to1@example.com', 'to2.example.com'],
+                       html_message='<html><body>Email 1 HTML</body></html>')
 
         # email with attachment
-        m = mail.EmailMultiAlternatives(
-            'Email 2 subject', 'Email 2 text', 'test@example.com', ['to1@example.com', 'to2.example.com'])
+        m = mail.EmailMultiAlternatives('Email 2 subject', 'Email 2 text', 'test@example.com',
+                                        ['to1@example.com', 'to2.example.com'])
         m.attach_alternative(
             '<html><body><p style="background-color: #AABBFF; color: white">Email 2 HTML</p></body></html>',
             'text/html')
@@ -64,12 +59,8 @@ class EmailDetailViewTest(TestCase):
 
     def test_view_context(self):
         mail.outbox = []
-        mail.send_mail(
-            "Email 1 subject",
-            "Email 1 text",
-            "test@example.com",
-            ['to1@example.com', 'to2.example.com'],
-            html_message='<html><body>Email 1 HTML</body></html>')
+        mail.send_mail("Email 1 subject", "Email 1 text", "test@example.com", ['to1@example.com', 'to2.example.com'],
+                       html_message='<html><body>Email 1 HTML</body></html>')
 
         response = self.client.get(self._get_detail_url())
         self.assertEqual(200, response.status_code)
@@ -79,8 +70,8 @@ class EmailDetailViewTest(TestCase):
 
     def test_get_returns_email_details(self):
         mail.outbox = []
-        m = mail.EmailMultiAlternatives(
-            'Email 2 Subject', 'Email 2 text', 'test@example.com', ['to1@example.com', 'to2.example.com'])
+        m = mail.EmailMultiAlternatives('Email 2 Subject', 'Email 2 text', 'test@example.com',
+                                        ['to1@example.com', 'to2.example.com'])
         m.attach_alternative(
             '<html><body><p style="background-color: #AABBFF; color: white">Email 2 HTML</p></body></html>',
             'text/html')
@@ -98,8 +89,11 @@ class EmailDetailViewTest(TestCase):
         self.assertEqual(
             '<html><body><p style="background-color: #AABBFF; color: white">Email 2 HTML</p></body></html>',
             response.context['html_body'])
-        self.assertEqual(
-            [{'filename': 'icon.gif', 'content_type': 'image/gif', 'file': None}], response.context['attachments'])
+        self.assertEqual([{
+            'filename': 'icon.gif',
+            'content_type': 'image/gif',
+            'file': None
+        }], response.context['attachments'])
         self.assertEqual(mail.outbox[0], response.context['message'])
         self.assertEqual(mail.outbox, response.context['outbox'])
         self.assertEqual(response.context['lookup_id'], message_id.strip(u'<>'))
@@ -122,8 +116,8 @@ class EmailAttachmentDownloadViewTest(TestCase):
         mail.outbox = []
 
     def test_get_sends_file_as_attachment(self):
-        m = mail.EmailMultiAlternatives(
-            'Email 2 Subject', 'Email 2 text', 'test@example.com', ['to1@example.com', 'to2.example.com'])
+        m = mail.EmailMultiAlternatives('Email 2 Subject', 'Email 2 text', 'test@example.com',
+                                        ['to1@example.com', 'to2.example.com'])
         m.attach_alternative(
             '<html><body><p style="background-color: #AABBFF; color: white">Email 2 HTML</p></body></html>',
             'text/html')
