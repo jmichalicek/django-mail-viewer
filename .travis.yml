@@ -7,11 +7,11 @@ python:
   - "3.5"
 
 env:
-  - TOXENV=py35-django-111
-  - TOXENV=py34-django-111
-  - TOXENV=py27-django-111
-  - TOXENV=py35-django-2
-  - TOXENV=py34-django-2
+  - TOX_ENV=py35-django-111
+  - TOX_ENV=py34-django-111
+  - TOX_ENV=py27-django-111
+  - TOX_ENV=py35-django-2
+  - TOX_ENV=py34-django-2
   # tox py 36 with py3.5 installed does not play nicely on travis
   # and tox python 3.5 with travis pythong 3.6 as the root also
   # does not play nicely, so
@@ -39,9 +39,9 @@ matrix:
     # - python: '3.5'
     #   env: TOX_ENV=py35-django-111
     - python: '3.6'
-      env:
-        - TOXENV=py36-django-111
-        - TOXENV=py36-django-2
+      env: TOX_ENV=py36-django-111
+    - python: '3.6'
+      env: TOX_ENV=py36-django-2
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
