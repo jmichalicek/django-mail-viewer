@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, unicode_literals
 
 import os
 
+from django.conf import settings
 from django.core import mail
 from django.test import TestCase
 from django.test.utils import override_settings
