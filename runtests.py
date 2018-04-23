@@ -7,11 +7,9 @@ try:
     settings.configure(
         DEBUG=True,
         USE_TZ=True,
-        DATABASES={
-            "default": {
-                "ENGINE": "django.db.backends.sqlite3",
-            }
-        },
+        DATABASES={"default": {
+            "ENGINE": "django.db.backends.sqlite3",
+        }},
         ROOT_URLCONF="django_mail_viewer.urls",
         INSTALLED_APPS=[
             "django.contrib.auth",
@@ -21,17 +19,16 @@ try:
         ],
         SITE_ID=1,
         MIDDLEWARE_CLASSES=(),
-        TEMPLATES=[
-            {'BACKEND': 'django.template.backends.django.DjangoTemplates',
-             'DIRS': [],
-             'APP_DIRS': True,
-             'OPTIONS': {
-                 'context_processors': []
-                 }
-             }
-        ],
+        TEMPLATES=[{
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [],
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'context_processors': []
+            }
+        }],
         EMAIL_BACKEND='django_mail_viewer.backends.locmem.EmailBackend',
-        CACHES = {
+        CACHES={
             'default': {
                 'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
             },
@@ -39,7 +36,7 @@ try:
                 'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
             }
         },
-        MAILVIEWER_CACHE = 'test_mailviewer'
+        MAILVIEWER_CACHE='test_mailviewer',
     )
 
     try:

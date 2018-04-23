@@ -65,7 +65,10 @@ class SingleEmailMixin(object):
                     elif name == "read-date":
                         attachment.read_date = value  # TODO: datetime
                 return {
-                    'filename': message.get_filename(), 'content_type': message.get_content_type(), 'file': attachment}
+                    'filename': message.get_filename(),
+                    'content_type': message.get_content_type(),
+                    'file': attachment
+                }
         return None
 
     def _parse_email_parts(self, message, decode_files=True):
@@ -132,16 +135,9 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
             outbox = connection.get_outbox()
 
         subject, text_body, html_body, sender, to, attachments = self._parse_email_parts(message, decode_files=False)
-        return super(EmailDetailView, self).get_context_data(lookup_id=lookup_id,
-                                                             message=message,
-                                                             text_body=text_body,
-                                                             html_body=html_body,
-                                                             subject=subject,
-                                                             sender=sender,
-                                                             to=to,
-                                                             attachments=attachments,
-                                                             outbox=outbox,
-                                                             **kwargs)
+        return super(EmailDetailView, self).get_context_data(lookup_id=lookup_id, message=message, text_body=text_body,
+                                                             html_body=html_body, subject=subject, sender=sender, to=to,
+                                                             attachments=attachments, outbox=outbox, **kwargs)
 
 
 class EmailAttachmentDownloadView(SingleEmailMixin, View):
