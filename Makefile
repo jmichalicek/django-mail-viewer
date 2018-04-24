@@ -51,18 +51,19 @@ docs: ## generate Sphinx HTML documentation, including API docs
 	$(BROWSER) docs/_build/html/index.html
 
 release: clean ## package and upload a release
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
+	python setup.py sdist bdist_wheel
+	# python setup.py sdist upload
+	# python setup.py bdist_wheel upload
 
 sdist: clean ## package
 	python setup.py sdist
 	ls -l dist
+
+wheel: clean
+	python setup.py bdist_wheel
 
 pypi-test:
 	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 pypi:
 	twine upload dist/*
-
-build:
-	python setup.py sdist bdist_wheel
