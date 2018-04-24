@@ -6,8 +6,7 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 
-# these are assignment tags and not simple tags for django 1.8 and 1.9 compatibility
-@register.assignment_tag
+@register.simple_tag
 def message_attribute(message, attribute):
     """
     Return the attribute from the SafeMIMEMessage
@@ -19,7 +18,7 @@ def message_attribute(message, attribute):
     return message.get(attribute)
 
 
-@register.assignment_tag
+@register.simple_tag
 def message_lookup_id(message):
     """
     Return the message id of an email message.

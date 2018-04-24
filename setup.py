@@ -3,8 +3,7 @@
 import os
 import sys
 
-from setuptools import setup, find_packages
-
+from setuptools import find_packages, setup
 
 version = '1.0.0'
 
@@ -41,13 +40,16 @@ setup(
     install_requires=[],
     license="MIT",
     zip_safe=False,
-    keywords=['django-mail-viewer', 'django', 'email', ],
+    keywords=[
+        'django-mail-viewer',
+        'django',
+        'email',
+    ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Framework :: Django',
-        'Framework :: Django :: 1.9',
-        'Framework :: Django :: 1.10',
         'Framework :: Django :: 1.11',
+        'Framework :: Django :: 2.0',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
