@@ -5,6 +5,9 @@ History
 
 Current
 +++++++
+
+1.0.0 (2018-04-23)
+++++++++++++++++++
 * Dropped testing of Django 1.8, 1.9 and 1.10
 * Stopped using assignment_tag in favor of Django 1.9+ simple_tag functionality, definitely breaking Django 1.8
 * Added testing of Django 2.0
