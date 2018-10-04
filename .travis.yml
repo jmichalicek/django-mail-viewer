@@ -11,10 +11,6 @@ env:
   - TOX_ENV=py34-django-111
   - TOX_ENV=py27-django-111
   - TOX_ENV=py35-django-2
-  - TOX_ENV=py36-django-2
-  - TOX_ENV=py37-django-2
-  - TOX_ENV=py36-django-21
-  - TOX_ENV=py37-django-21
   # tox py 36 with py3.5 installed does not play nicely on travis
   # and tox python 3.5 with travis pythong 3.6 as the root also
   # does not play nicely, so
