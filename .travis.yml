@@ -22,9 +22,9 @@ matrix:
     - language: python
       python:
         - '3.6'
-         - env: TOX_ENV=py36-django-111
-         - env: TOX_ENV=py36-django-2
-         - env: TOX_ENV=py36-django-21
+          - env: TOX_ENV=py36-django-111
+          - env: TOX_ENV=py36-django-2
+          - env: TOX_ENV=py36-django-21
         - '3.7'
           - env: TOX_ENV=py37-django-2
           - env: TOX_ENV=py37-django-21
