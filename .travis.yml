@@ -19,38 +19,15 @@ env:
 matrix:
   fast_finish: true
   include:
-    # - python: '2.7'
-    #   env: TOX_ENV=py27-django-19
-    # - python: '3.4'
-    #   env: TOX_ENV=py34-django-19
-    # - python: '3.5'
-    #   env: TOX_ENV=py35-django-19
-    # - python: '2.7'
-    #   env: TOX_ENV=py27-django-110
-    # - python: '3.4'
-    #   env: TOX_ENV=py34-django-110
-    # - python: '3.5'
-    #   env: TOX_ENV=py35-django-110
-    # - python: '2.7'
-    #   env: TOX_ENV=py27-django-111
-    # - python: '3.4'
-    #   env: TOX_ENV=py34-django-111
-    # - python: '3.5'
-    #   env: TOX_ENV=py35-django-111
-    - python: '3.6'
-      env: TOX_ENV=py36-django-111
-    - python: '3.6'
-      env: TOX_ENV=py36-django-2
-    - python: '3.6'
-      env: TOX_ENV=py36-django-21
-    - python: '3.7'
-      env: TOX_ENV=py37-django-2
-      language: python
-      sudo: required
-    - python: '3.7'
-      env: TOX_ENV=py37-django-21
-      language: python
-      sudo: required
+    language: python
+    python:
+      - '3.6'
+       - env: TOX_ENV=py36-django-111
+       - env: TOX_ENV=py36-django-2
+       - env: TOX_ENV=py36-django-21
+      - '3.7'
+        - env: TOX_ENV=py37-django-2
+        - env: TOX_ENV=py37-django-21
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
