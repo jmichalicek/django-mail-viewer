@@ -1,6 +1,6 @@
 # Config file for automatic testing at travis-ci.org
 sudo: false
-dist: trusty
+dist: xenial
 
 language: python
 python:
@@ -45,8 +45,12 @@ matrix:
       env: TOX_ENV=py36-django-21
     - python: '3.7'
       env: TOX_ENV=py37-django-2
+      language: python
+      sudo: required
     - python: '3.7'
       env: TOX_ENV=py37-django-21
+      language: python
+      sudo: required
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
