@@ -43,12 +43,18 @@ matrix:
       env: TOX_ENV=py36-django-2
     - python: '3.6'
       env: TOX_ENV=py36-django-21
+    - python: '3.6'
+      env: TOX_ENV=py36-django-22
     - python: '3.7'
       env: TOX_ENV=py37-django-2
       language: python
       sudo: required
     - python: '3.7'
       env: TOX_ENV=py37-django-21
+      language: python
+      sudo: required
+    - python: '3.7'
+      env: TOX_ENV=py37-django-22
       language: python
       sudo: required
 
