@@ -1,6 +1,6 @@
 # Config file for automatic testing at travis-ci.org
 sudo: false
-dist: xenial
+dist: bionic
 
 language: python
 python:
@@ -8,7 +8,6 @@ python:
 
 env:
   - TOX_ENV=py35-django-111
-  - TOX_ENV=py34-django-111
   - TOX_ENV=py27-django-111
   - TOX_ENV=py35-django-2
   # tox py 36 with py3.5 installed does not play nicely on travis
@@ -21,8 +20,6 @@ matrix:
   include:
     # - python: '2.7'
     #   env: TOX_ENV=py27-django-19
-    # - python: '3.4'
-    #   env: TOX_ENV=py34-django-19
     # - python: '3.5'
     #   env: TOX_ENV=py35-django-19
     # - python: '2.7'
@@ -43,12 +40,18 @@ matrix:
       env: TOX_ENV=py36-django-2
     - python: '3.6'
       env: TOX_ENV=py36-django-21
+    - python: '3.6'
+      env: TOX_ENV=py36-django-22
     - python: '3.7'
       env: TOX_ENV=py37-django-2
       language: python
       sudo: required
     - python: '3.7'
       env: TOX_ENV=py37-django-21
+      language: python
+      sudo: required
+    - python: '3.7'
+      env: TOX_ENV=py37-django-22
       language: python
       sudo: required
 
