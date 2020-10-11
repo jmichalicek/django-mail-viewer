@@ -5,8 +5,8 @@ Django Mail Viewer
 .. image:: https://badge.fury.io/py/django-mail-viewer.png
     :target: https://badge.fury.io/py/django-mail-viewer
 
-.. image:: https://travis-ci.org/jmichalicek/django-mail-viewer.png?branch=master
-    :target: https://travis-ci.org/jmichalicek/django-mail-viewer
+.. image:: https://github.com/jmichalicek/django-mail-viewer/workflows/Python%20package/badge.svg
+    :target: https://github.com/jmichalicek/django-mail-viewer/actions?query=workflow%3A%22Python+package%22
 
 View emails in development without actually sending them.
 

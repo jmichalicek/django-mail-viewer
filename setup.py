@@ -10,6 +10,7 @@ version = '1.0.0'
 if sys.argv[-1] == 'publish':
     try:
         import wheel
+
         print("Wheel version: ", wheel.__version__)
     except ImportError:
         print('Wheel library missing. Please run "pip install wheel"')
@@ -25,13 +26,12 @@ if sys.argv[-1] == 'tag':
     sys.exit()
 
 readme = open('README.rst').read()
-history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='django-mail-viewer',
     version=version,
     description="""View emails in development without actually sending them.""",
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
     author='Justin Michalicek',
     author_email='jmichalicek@gmail.com',
     url='https://github.com/jmichalicek/django-mail-viewer',
@@ -40,11 +40,7 @@ setup(
     install_requires=[],
     license="MIT",
     zip_safe=False,
-    keywords=[
-        'django-mail-viewer',
-        'django',
-        'email',
-    ],
+    keywords=['django-mail-viewer', 'django', 'email',],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Framework :: Django',
@@ -61,5 +57,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
 )
