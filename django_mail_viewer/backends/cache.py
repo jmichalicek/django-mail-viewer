@@ -1,8 +1,6 @@
 """
 Backend for test environment.
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django.core import cache
 from django.core.mail.backends.base import BaseEmailBackend
 
@@ -38,9 +36,7 @@ class EmailBackend(BaseEmailBackend):
             if not current_cache_keys:
                 current_cache_keys = []
             current_cache_keys.append(message_id)
-            self.cache.set(
-                self.cache_keys_key,
-                current_cache_keys)
+            self.cache.set(self.cache_keys_key, current_cache_keys)
             msg_count += 1
         return msg_count
 

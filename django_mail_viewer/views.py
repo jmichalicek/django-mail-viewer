@@ -67,7 +67,7 @@ class SingleEmailMixin(object):
                 return {
                     'filename': message.get_filename(),
                     'content_type': message.get_content_type(),
-                    'file': attachment
+                    'file': attachment,
                 }
         return None
 
@@ -102,6 +102,7 @@ class EmailListView(TemplateView):
     """
     Display a list of sent emails.
     """
+
     template_name = 'mail_viewer/email_list.html'
 
     def get_context_data(self, **kwargs):
@@ -118,6 +119,7 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
     """
     Display details of an email
     """
+
     template_name = 'mail_viewer/email_detail.html'
 
     def get(self, request, *args, **kwargs):
@@ -135,9 +137,18 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
             outbox = connection.get_outbox()
 
         subject, text_body, html_body, sender, to, attachments = self._parse_email_parts(message, decode_files=False)
-        return super(EmailDetailView, self).get_context_data(lookup_id=lookup_id, message=message, text_body=text_body,
-                                                             html_body=html_body, subject=subject, sender=sender, to=to,
-                                                             attachments=attachments, outbox=outbox, **kwargs)
+        return super(EmailDetailView, self).get_context_data(
+            lookup_id=lookup_id,
+            message=message,
+            text_body=text_body,
+            html_body=html_body,
+            subject=subject,
+            sender=sender,
+            to=to,
+            attachments=attachments,
+            outbox=outbox,
+            **kwargs
+        )
 
 
 class EmailAttachmentDownloadView(SingleEmailMixin, View):
@@ -151,10 +162,11 @@ class EmailAttachmentDownloadView(SingleEmailMixin, View):
         requested = int(self.kwargs.get('attachment'))
         i = 0
         # TODO: de-nest this some
+        # TODO: use enumerate()...
         for part in message.walk():
             content_disposition = part.get("Content-Disposition", '')
             dispositions = content_disposition.strip().split(";")
-            if (content_disposition and dispositions[0].lower() == "attachment"):
+            if content_disposition and dispositions[0].lower() == "attachment":
                 if i == requested:
                     return self._parse_email_attachment(part, True)
                 i += 1
