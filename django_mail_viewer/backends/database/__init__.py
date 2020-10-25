@@ -19,12 +19,40 @@ class EmailBackend(BaseEmailBackend):
         for message in messages:
             # Create db model instances
             m = message.message()
-            message_id = m.get('message-id')
-            subject = m.get('subject')
-            sender = m.get('from')
-            to = m.get('to')
-            e = EmailMessage(message_id=message_id, subject=subject, to=to, sender=sender)
-            e.save()
+            if m.is_multipart():
+                # test this... but this might work
+                message_id = m.get('message-id')
+                main_message = EmailMessage(
+                    message_id=message_id, content=message.get_payload(), content_type=m.get_content_type()
+                )
+                main_message.save()
+                for part in m.walk():
+                    content_type = part.get_content_type()
+                    if content_type == 'text/plain':
+                        # should we get the default charset from the system if no charset?
+                        # decode=True handles quoted printable and base64 encoded data
+                        charset = part.get_param('charset')
+                        content = part.get_payload(decode=True).decode(charset, errors='replace')
+                    elif content_type == 'text/html':
+                        # original code set html to '' if it was None and then appended
+                        # as if we might have multiple html parts which are just one html message?
+                        charset = part.get_param('charset')
+                        content = part.get_payload(decode=True).decode(charset, errors='replace')
+
+                    message_id = part.get('message-id', '')  # do sub-parts have a message-id?
+                    p = EmailMessage(
+                        message_id=message_id,
+                        content=message.get_payload(),
+                        parent=main_message,
+                        content_type=content_type,
+                    )
+                    p.save()
+            else:
+                message_id = m.get('message-id')
+                main_message = EmailMessage(
+                    message_id=message_id, content=message.get_payload(), content_type=m.get_content_type()
+                )
+                main_message.save()
 
             msg_count += 1
         return msg_count
@@ -38,7 +66,7 @@ class EmailBackend(BaseEmailBackend):
         # or should there be a layer in between or some sort of adapter pattern to make the db based email message
         # look/act like an email.message.Message? I lean towards just moving logic to the EmailBackend but may need
         # some combo of the two for the views/templates to work nicely.
-        pass
+        return EmailMessage.objects.filter(message_id=lookup_id)
 
     def get_outbox(self, *args, **kwargs):
         """
@@ -47,3 +75,4 @@ class EmailBackend(BaseEmailBackend):
         """
         pass
         # Query db for EmailMessage instance(s)
+        return EmailMessage.objects.all()
