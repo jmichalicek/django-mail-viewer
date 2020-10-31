@@ -1,5 +1,5 @@
-import email.message.Message
-import email.utils.unquote
+import email.message
+import email.utils
 import json
 import pickle
 from email.charset import Charset
@@ -31,73 +31,6 @@ class AbstractBaseEmailMessage(models.Model):
         abstract = True
 
 
-class FileBackedEmailMessageMixin(AbstractBaseEmailMessage):
-    """
-    Abstract base class for email messages storing emails pickled in a file.
-    """
-
-    @cached_property
-    def message(self) -> email.message.Message:
-        """
-        The email.message.Message for this email
-        """
-        # Does this belong here or on EmailMessage? Perhaps yet another base class should be created for
-        # the assumption of a FileField. Another user (or I, in a later version) may want to store this data in a
-        # TextField similar to django-pickle-field or may make models to store the entire structure
-        # in the database with EmailMessage conforming to email.message.EmailMessage (or Message) API
-        with self.serialized_message_file.open('r') as f:
-            return pickle.load(f)
-
-    # Stuff to wrap email.message.Message for a partial implementation of that
-    # I really only need/use get_filename(), get_content_type(), get_payload(), walk()
-    def __str__(self):
-        return self.message.__str__()
-
-    def __bytes__(self):
-        return self.message.__bytes__()
-
-    def as_string(self, unixfrom=False, maxheaderlen=0, policy=None):
-        return self.message.as_string(unixfrom=unixfrom, maxheaderlen=maxheaderlen, policy=policy)
-
-    def as_bytes(self, unixfrom=False, policy=None):
-        return self.message.as_bytes(unixfrom=unixfrom, policy=policy)
-
-    def get_content_type(self) -> str:
-        """
-        Returns the content-type of the email
-        """
-        return self.message.get_content_type()
-
-    def get_payload(self, decode: bool = False):
-        """
-        Returns attachment as bytes
-
-        this is from python 3.5 email.message.Message.
-        Django still uses email.message.Message rather than email.message.EmailMessage, so going with that.
-        """
-        return self.message.get_payload(decode=decode)
-
-    def walk(self):
-        return self.message.walk()
-
-    def get_filename(self):
-        return self.message.get_filename()
-
-
-# Going with https://stackoverflow.com/a/58756613 for the camel case here vs EMailMessage, etc. because why not?
-class FileBackedEmailMessage(FileBackedEmailMessageMixin, AbstractBaseEmailMessage):
-    """
-    An Email Message where the base message is stored using pickle in a file using your system's default media storage.
-
-    To customize storage, subclass AbstractBaseEmailMessage and add a `FileField()` named `serialized_message_file`
-    with the storage you would like to use. This may be because the default media storage is public readable or
-    it just needs to be stored elsewhere, such as locally, or a different s3 bucket than the default storage.
-    """
-
-    # May likely want a different subclass of
-    serialized_message_file = models.FileField(blank=True)
-
-
 # DB storage implementation idea 2 - entire structure in nested db structure
 class EmailMessageQuerySet(models.QuerySet):
     """
@@ -106,7 +39,7 @@ class EmailMessageQuerySet(models.QuerySet):
 
     def defer_content(self, *args, **kwargs):
         """
-        Defers loading of some JSONFields which can be large and greatly increase memory consumption and effect performance
+        Defers loading of some content PickledObjectField which can be large and greatly increase memory consumption and effect performance
         """
         return self.defer('content',)
 
@@ -122,30 +55,78 @@ class EmailMessage(AbstractBaseEmailMessage):
     parent = models.ForeignKey(
         'self', blank=True, null=True, default=None, related_name='parts', on_delete=models.CASCADE
     )
+    # TODO: I do not think I actually need this, I can just grab it from the headers
     content_type = models.TextField(blank=True, default='')
     # or do I still store this as a FileField()
     content = PickledObjectField(blank=True, default=None)
     message_headers = models.TextField()
 
+    class Meta:
+        db_table = 'mail_viewer_emailmessage'
+
     # I really only need/use get_filename(), get_content_type(), get_payload(), walk()
 
+    def get(self, attr, failobj=None):
+        """Get a header value.
+        Like __getitem__() but return failobj instead of None when the field
+        is missing.
+        """
+        # Or should I muck with __getitem__ and __setitem__, etc
+        # like in https://github.com/python/cpython/blob/3.8/Lib/email/message.py#L382
+        vals = {k.lower(): v for k, v in self.values().items()}
+        if vals:
+            lower_attr = attr.lower()
+            return vals.get(lower_attr, failobj)
+        return failobj
+
     def is_multipart(self) -> bool:
+        # Not certain the self.parts.all() is accurate
         return self.content_type == 'rfc/822' or self.parts.all().exists()
 
     def headers(self):
         return json.loads(self.message_headers)
 
+    def values(self):
+        return self.headers()
+
     def walk(self) -> 'QuerySet[EmailMessage]':
+        if not self.parts.all().exists():
+            # Or should I be saving a main message all the time and even just a plaintext has a child part, hmm
+            return [self]
         return self.parts.all()
+
+    def get_param(self, param: str, failobj=None, header: str = 'content-type', unquote: bool = True) -> str:
+        """
+        Return the value of the Content-Type header’s parameter param as a string. If the message has no Content-Type header or if there is no such parameter, then failobj is returned (defaults to None).
+
+        Optional header if given, specifies the message header to use instead of Content-Type.
+
+        See https://docs.python.org/3/library/email.compat32-message.html#email.message.Message.get_param
+        """
+        # TODO: error handling skipped for sure here... need to see what the real email message does
+        # Should also consider using cgi.parse_header
+        h = self.get(header)
+        params = h.split(';')
+        for part in params[1:]:
+            part_name, part_val = part.split('=')
+            part_name = part_name.strip()
+            part_val = part_val.strip()
+            if part_name == param:
+                return part_val
+        return ''
 
     def get_payload(self, i: int = None, decode: bool = False):
         """
         Temporary backwards compatibility with email.message.Message
         """
         # TODO: handle decode
-        # not sure if I ever even need this, I think when I use this it is
-        if self.is_multipart:
-            return self.content
+
+        # TODO: This seems wrong....
+        if not self.is_multipart():
+            charset = self.get_param('charset')
+            # our content is a str but get_payload() returns bytes normally so we need to re-encode it... yeah.
+            # not certain always going utf-8 is smart here, but it's what I am doing for now.
+            return self.content.encode(charset)
 
         parts = self.parts.all()
         if i:
