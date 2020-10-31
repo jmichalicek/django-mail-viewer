@@ -1,0 +1,20 @@
+[
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$216000$pTzRyJD4Bh6i$dm4VU5i+H8exwB4SCF6bQDnK5d5pQtVpMmSxjLT0SRs=",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "django",
+    "first_name": "",
+    "last_name": "",
+    "email": "django@example.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2020-10-30T21:06:05.567Z",
+    "groups": [],
+    "user_permissions": []
+  }
+}
+]
