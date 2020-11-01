@@ -22,7 +22,9 @@ class AbstractBaseEmailMessage(models.Model):
     like to use.
     """
 
-    # Should this be the pk? Technically optional, but really should be there according to RFC 5322 section 3.6.4
+    # Technically optional, but really should be there according to RFC 5322 section 3.6.4
+    # and Django always creates teh message_id on the main part of the message so we know
+    # it will be there, but not for all sub-parts of a multi-part message
     message_id = models.CharField(max_length=250, blank=True, default='', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -55,11 +57,9 @@ class EmailMessage(AbstractBaseEmailMessage):
     parent = models.ForeignKey(
         'self', blank=True, null=True, default=None, related_name='parts', on_delete=models.CASCADE
     )
-    # TODO: I do not think I actually need this, I can just grab it from the headers
-    content_type = models.TextField(blank=True, default='')
-    # or do I still store this as a FileField()
-    content = PickledObjectField(blank=True, default=None)
     message_headers = models.TextField()
+    # May want to store this in a file on a FileField...
+    content = PickledObjectField(blank=True, default=None)
 
     class Meta:
         db_table = 'mail_viewer_emailmessage'
@@ -134,7 +134,9 @@ class EmailMessage(AbstractBaseEmailMessage):
         return parts
 
     def get_content_type(self):
-        return self.content_type
+        h = self.get('content-type')
+        params = h.split(';')
+        return params[0]
 
     def get_filename(self, failobj=None):
         content_disposition = self.headers.get('content_disposition', '')

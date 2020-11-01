@@ -23,34 +23,30 @@ class EmailBackend(BaseEmailBackend):
             if message.is_multipart():
                 # TODO: Should this really be done recursively? I believe forwarded emails may
                 # have multiple layers of parts/dispositions
-                # test this... but this might work
                 message_id = message.get('message-id')
-                main_message = EmailMessage(
-                    message_id=message_id, content=message.get_payload(), content_type=message.get_content_type()
-                )
-                main_message.save()
-                for part in message.walk():
+                main_message = None
+                for i, part in enumerate(message.walk()):
                     content_type = part.get_content_type()
                     charset = part.get_param('charset')
-                    if content_type == 'text/plain':
-                        # should we get the default charset from the system if no charset?
-                        # decode=True handles quoted printable and base64 encoded data
-                        # TODO: Suspect this should be decode=False
+                    # handle attachments - probably need to look at SingleEmailMixin._parse_email_attachment()
+                    # and make that more reusable
+                    if content_type in ['text/plain', 'text/html']:
                         content = part.get_payload(decode=True).decode(charset, errors='replace')
-                    elif content_type == 'text/html':
-                        # original code set html to '' if it was None and then appended
-                        # as if we might have multiple html parts which are just one html message?
-                        content = part.get_payload(decode=True).decode(charset, errors='replace')
-
+                    else:
+                        # the main multipart/alternative message for multipart messages has no content/payload
+                        # TODO: handle file attachments
+                        content = ''
                     message_id = part.get('message-id', '')  # do sub-parts have a message-id?
                     p = EmailMessage(
                         message_id=message_id,
                         content=content,
                         parent=main_message,
                         content_type=content_type,
-                        message_headers=json.dumps(list(part.items())),
+                        message_headers=json.dumps(dict(part.items())),
                     )
                     p.save()
+                    if i == 0:
+                        main_message = p
             else:
                 message_id = message.get('message-id')
                 main_message = EmailMessage(
@@ -73,11 +69,11 @@ class EmailBackend(BaseEmailBackend):
         # or should there be a layer in between or some sort of adapter pattern to make the db based email message
         # look/act like an email.message.Message? I lean towards just moving logic to the EmailBackend but may need
         # some combo of the two for the views/templates to work nicely.
-        return EmailMessage.objects.filter(message_id=lookup_id).first()
+        return EmailMessage.objects.filter(message_id=lookup_id, parent=None).first()
 
     def get_outbox(self, *args, **kwargs):
         """
         Get the outbox used by this backend.  This backend returns a copy of mail.outbox.
         May add pagination args/kwargs.
         """
-        return EmailMessage.objects.all()
+        return EmailMessage.objects.filter(parent=None).defer_content()

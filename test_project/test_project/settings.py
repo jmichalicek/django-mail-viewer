@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_mail_viewer',
     'django_mail_viewer.backends.database.apps.DatabaseBackendConfig',
+    'test_project',
 ]
 
 MIDDLEWARE = [
