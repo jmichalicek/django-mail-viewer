@@ -34,6 +34,9 @@ class SingleEmailMixin(object):
         msg: email.message.Message object
         decode_file: Boolean whether to decode the base64 encoded file to an actual file or not
         """
+        # TODO: move this all to the email backend. It exists on the db backend already
+        # but maybe it could live on BaseEmailBackend - or just in a function not in a class
+        # because right now the database email backend is the only one which needs it
         content_disposition = message.get("Content-Disposition", None)
         if content_disposition:
             dispositions = content_disposition.strip().split(";")
@@ -65,6 +68,7 @@ class SingleEmailMixin(object):
                     elif name == "read-date":
                         attachment.read_date = value  # TODO: datetime
                 return {
+                    # 'filename': Path(message.get_filename()).name,  ??
                     'filename': message.get_filename(),
                     'content_type': message.get_content_type(),
                     'file': attachment,

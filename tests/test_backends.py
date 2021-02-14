@@ -4,6 +4,7 @@ Test django_mail_viewer.backends
 from __future__ import absolute_import, division, unicode_literals
 
 import json
+import shutil
 from pathlib import Path
 
 from django.conf import settings
@@ -17,6 +18,7 @@ class LocMemBackendTest(SimpleTestCase):
     """
     Test django_mail_viewer.backends.locmem.EmailBackend
     """
+    # TODO: test_get_outbox()
 
     def setUp(self):
         mail.outbox = []
@@ -55,6 +57,8 @@ class CacheBackendTest(SimpleTestCase):
     """
     Test django_mail_viewer.backends.cache.EmailBackend
     """
+    # TODO: test_get_message()
+    # TODO: test_get_outbox()
 
     def setUp(self):
         # not sure this is the best way to do this, but it'll work for now
@@ -72,13 +76,13 @@ class CacheBackendTest(SimpleTestCase):
             self.assertEqual(1, len(self.mail_cache.get(connection.cache_keys_key)))
 
 
-import shutil
-
-
 class DatabaseBackendTest(TestCase):
     """
     Test django_mail_viewer.backends.cache.EmailBackend
     """
+
+    # TODO: test_get_message()
+    # TODO: test_get_outbox()
 
     @classmethod
     def tearDownClass(cls) -> None:

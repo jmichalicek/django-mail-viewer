@@ -31,7 +31,7 @@ class EmailBackend(BaseEmailBackend):
         decode_file: Boolean whether to decode the base64 encoded file to an actual file or not
         """
         # copied from views.SingleEmailMixin._parse_email_attachment()
-        # TODO: deduplicate this
+        # TODO: deduplicate this. I think it maybe could live on BaseEmailBackend safely
         content_disposition = message.get("Content-Disposition", None)
         if content_disposition:
             dispositions = content_disposition.strip().split(";")
