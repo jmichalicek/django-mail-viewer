@@ -1,12 +1,15 @@
 import sys
+from pathlib import Path
 
 try:
     from django.conf import settings
     from django.test.utils import get_runner
+    root_dir = Path(__file__).resolve().parent
 
     settings.configure(
         DEBUG=True,
         USE_TZ=True,
+        # TODO: test on multiple database backends?
         DATABASES={"default": {
             "ENGINE": "django.db.backends.sqlite3",
         }},
@@ -37,6 +40,7 @@ try:
             }
         },
         MAILVIEWER_CACHE='test_mailviewer',
+        MEDIA_ROOT=str(root_dir / '.test_media_root/')
     )
 
     try:

@@ -52,3 +52,4 @@ docs/_build
 .venv
 
 test_project/mailviewer_attachments
+.test_media_root/
