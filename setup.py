@@ -36,7 +36,7 @@ setup(
     url='https://github.com/jmichalicek/django-mail-viewer',
     packages=find_packages(exclude=['tests', 'docs']),
     include_package_data=True,
-    install_requires=['django-picklefield<=4.0,>=3.0'],
+    install_requires=[],
     license="MIT",
     zip_safe=False,
     keywords=['django-mail-viewer', 'django', 'email',],

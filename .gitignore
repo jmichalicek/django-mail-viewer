@@ -50,3 +50,5 @@ docs/_build
 # Pyenv
 .python-version
 .venv
+
+test_project/mailviewer_attachments

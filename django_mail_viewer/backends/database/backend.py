@@ -1,9 +1,16 @@
 # Not sure I like this. Can I use apps.py to do this a cleaner way?
 import json
+from io import BytesIO
+from pathlib import Path
 
+from django.core.files.base import ContentFile
 from django.core.mail.backends.base import BaseEmailBackend
 
 from ... import settings as mailviewer_settings
+
+# Because of the need for EmailMessage this stuff cannot go into or be imported
+# into __init__.py to give using this backend the same import structure as the
+# other backends
 from .models import EmailMessage
 
 
@@ -14,6 +21,53 @@ class EmailBackend(BaseEmailBackend):
     Uses a Django model to store sent emails so that they can be easily retrieved in multi-process environments such as
     using Django Channels or when sending an email from a python shell or for longer term storage and lookup.
     """
+
+    def _parse_email_attachment(self, message, decode_file=True):
+        """
+        Parse an attachment out of an email.message.Message object.
+
+        params:
+        msg: email.message.Message object
+        decode_file: Boolean whether to decode the base64 encoded file to an actual file or not
+        """
+        # copied from views.SingleEmailMixin._parse_email_attachment()
+        # TODO: deduplicate this
+        content_disposition = message.get("Content-Disposition", None)
+        if content_disposition:
+            dispositions = content_disposition.strip().split(";")
+            if bool(content_disposition and dispositions[0].lower() == "attachment"):
+                if decode_file:
+                    file_data = message.get_payload(decode=True)
+                    attachment = BytesIO(file_data)
+                    attachment.size = len(file_data)
+
+                    attachment.content_type = message.get_content_type()
+                    attachment.name = None
+                    attachment.create_date = None
+                    attachment.mod_date = None
+                    attachment.read_date = None
+                else:
+                    attachment = None
+                for param in dispositions[1:]:
+                    name, value = param.split("=")
+                    name = name.lower()
+
+                    # Since I am terrible and left terrible comments I am assuming the
+                    # datetime TODO comments below mean to store as a datetime.datetime object
+                    if name == "filename":
+                        attachment.name = value
+                    elif name == "create-date":
+                        attachment.create_date = value  # TODO: datetime
+                    elif name == "modification-date":
+                        attachment.mod_date = value  # TODO: datetime
+                    elif name == "read-date":
+                        attachment.read_date = value  # TODO: datetime
+                return {
+                    'filename': Path(message.get_filename()).name,
+                    'content_type': message.get_content_type(),
+                    'file': attachment,
+                }
+        return None
 
     def send_messages(self, messages):
         msg_count = 0
@@ -30,18 +84,28 @@ class EmailBackend(BaseEmailBackend):
                     charset = part.get_param('charset')
                     # handle attachments - probably need to look at SingleEmailMixin._parse_email_attachment()
                     # and make that more reusable
-                    if content_type in ['text/plain', 'text/html']:
+                    content_disposition = part.get("Content-Disposition", None)
+                    if content_disposition:
+                        # attachment_data = part.get_payload(decode=True)
+                        attachment_data = self._parse_email_attachment(part)
+                        file_attachment = ContentFile(
+                            attachment_data.get('file').read(), name=attachment_data.get('filename', 'attachment')
+                        )
+                        content = ''
+                    elif content_type in ['text/plain', 'text/html']:
                         content = part.get_payload(decode=True).decode(charset, errors='replace')
+                        file_attachment = ''
                     else:
                         # the main multipart/alternative message for multipart messages has no content/payload
                         # TODO: handle file attachments
                         content = ''
+                        file_attachment = ''
                     message_id = part.get('message-id', '')  # do sub-parts have a message-id?
                     p = EmailMessage(
                         message_id=message_id,
                         content=content,
+                        file_attachment=file_attachment,
                         parent=main_message,
-                        content_type=content_type,
                         message_headers=json.dumps(dict(part.items())),
                     )
                     p.save()
@@ -52,7 +116,6 @@ class EmailBackend(BaseEmailBackend):
                 main_message = EmailMessage(
                     message_id=message_id,
                     content=message.get_payload(),
-                    content_type=message.get_content_type(),
                     message_headers=json.dumps(dict(message.items())),
                 )
                 main_message.save()
@@ -76,4 +139,4 @@ class EmailBackend(BaseEmailBackend):
         Get the outbox used by this backend.  This backend returns a copy of mail.outbox.
         May add pagination args/kwargs.
         """
-        return EmailMessage.objects.filter(parent=None).defer_content()
+        return EmailMessage.objects.filter(parent=None)
