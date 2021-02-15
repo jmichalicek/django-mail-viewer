@@ -87,8 +87,7 @@ class DatabaseBackendTest(TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         try:
-            media_dir = Path(settings.MEDIA_ROOT)
-            shutil.rmtree(media_dir)
+            shutil.rmtree(settings.MEDIA_ROOT)
         finally:
             super().tearDownClass()
 
