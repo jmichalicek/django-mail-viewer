@@ -51,7 +51,7 @@ class EmailMessage(AbstractBaseEmailMessage):
 
     class Meta:
         db_table = 'mail_viewer_emailmessage'
-        ordering = ('-id',)
+        ordering = ('id', )
         indexes = [models.Index(fields=['message_id'])]
 
     # I really only need/use get_filename(), get_content_type(), get_payload(), walk()
