@@ -23,6 +23,7 @@ class SingleEmailMixin(object):
         message = None
         with mail.get_connection() as connection:
             message_id = self.kwargs.get('message_id')
+            # TODO: put this fiddling with brackets on the backend itself...
             message = connection.get_message(u'<%s>' % message_id)
         return message
 

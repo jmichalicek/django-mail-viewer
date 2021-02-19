@@ -6,19 +6,33 @@ from __future__ import absolute_import, division, unicode_literals
 import json
 import shutil
 from pathlib import Path
+from django.core.mail import send_mail
 
 from django.conf import settings
 from django.core import cache, mail
 from django.test import SimpleTestCase, TestCase
 
 from django_mail_viewer.backends.database.models import EmailMessage
+from typing import Any
+
+
+def send_plaintext_messages(count: int, connection: Any):
+    for x in range(count):
+        mail.EmailMultiAlternatives(
+            f'Email subject {x}',
+            f'Email text {x}',
+            'test@example.com',
+            ['to1@example.com', 'to2.example.com'],
+            connection=connection,
+        ).send()
 
 
 class LocMemBackendTest(SimpleTestCase):
     """
     Test django_mail_viewer.backends.locmem.EmailBackend
     """
-    # TODO: test_get_outbox()
+
+    connection_backend = 'django_mail_viewer.backends.locmem.EmailBackend'
 
     def setUp(self):
         mail.outbox = []
@@ -31,49 +45,70 @@ class LocMemBackendTest(SimpleTestCase):
         m = mail.EmailMultiAlternatives(
             'Email 2 subject', 'Email 2 text', 'test@example.com', ['to1@example.com', 'to2.example.com']
         )
-        with mail.get_connection('django_mail_viewer.backends.locmem.EmailBackend') as connection:
+        with mail.get_connection(self.connection_backend) as connection:
             self.assertEqual([], mail.outbox)
             self.assertEqual(1, connection.send_messages([m]))
             self.assertEqual(1, len(mail.outbox))
 
-    def test_get_message_returns_requested_message(self):
-
-        m = mail.EmailMultiAlternatives(
-            'Email 2 subject', 'Email 2 text', 'test@example.com', ['to1@example.com', 'to2.example.com']
-        )
-        m2 = mail.EmailMultiAlternatives(
-            'Email 2 subject', 'Email 2 text', 'test@example.com', ['to1@example.com', 'to2.example.com']
-        )
+    def test_get_message(self):
 
         with mail.get_connection('django_mail_viewer.backends.locmem.EmailBackend') as connection:
-            connection.send_messages([m, m2])
+            send_plaintext_messages(2, connection)
             self.assertEqual(2, len(mail.outbox))
             for message in mail.outbox:
                 # check that we can use the message id to look up a specific message's data
                 self.assertEqual(message, connection.get_message(message.get('Message-ID')))
+
+    def test_get_outbox(self):
+        with mail.get_connection(self.connection_backend) as connection:
+            send_plaintext_messages(1, connection)
+            self.assertEqual(1, len(connection.get_outbox()))
+            send_plaintext_messages(1, connection)
+            self.assertEqual(2, len(connection.get_outbox()))
 
 
 class CacheBackendTest(SimpleTestCase):
     """
     Test django_mail_viewer.backends.cache.EmailBackend
     """
-    # TODO: test_get_message()
-    # TODO: test_get_outbox()
+
+    connection_backend = 'django_mail_viewer.backends.cache.EmailBackend'
 
     def setUp(self):
         # not sure this is the best way to do this, but it'll work for now
         self.mail_cache = cache.caches[settings.MAILVIEWER_CACHE]
         self.mail_cache.clear()
+        mail.outbox = []
 
     def test_send_messages_adds_message_to_cache(self):
         m = mail.EmailMultiAlternatives(
             'Email 2 subject', 'Email 2 text', 'test@example.com', ['to1@example.com', 'to2.example.com']
         )
-        with mail.get_connection('django_mail_viewer.backends.cache.EmailBackend') as connection:
+        with mail.get_connection(self.connection_backend) as connection:
             self.mail_cache.delete(connection.cache_keys_key)
             self.assertIsNone(self.mail_cache.get(connection.get_outbox()))
             self.assertEqual(1, connection.send_messages([m]))
             self.assertEqual(1, len(self.mail_cache.get(connection.cache_keys_key)))
+
+    def test_get_message(self):
+        """
+        Test using get_message() to look up a specific message.
+        """
+
+        with mail.get_connection(self.connection_backend) as connection:
+            send_plaintext_messages(2, connection)
+            for message_id in self.mail_cache.get(connection.cache_keys_key):
+                # Not so obvious test here - we know our message ids from the cache, so we just check that looking up
+                # by the message id gets us an email message with the same Message-ID headers
+                # Could also iterate over connection.get_outbox()
+                self.assertEqual(message_id, connection.get_message(message_id).get('Message-ID'))
+
+    def test_get_outbox(self):
+        with mail.get_connection(self.connection_backend) as connection:
+            send_plaintext_messages(1, connection)
+            self.assertEqual(1, len(connection.get_outbox()))
+            send_plaintext_messages(1, connection)
+            self.assertEqual(2, len(connection.get_outbox()))
 
 
 class DatabaseBackendTest(TestCase):
@@ -81,8 +116,7 @@ class DatabaseBackendTest(TestCase):
     Test django_mail_viewer.backends.cache.EmailBackend
     """
 
-    # TODO: test_get_message()
-    # TODO: test_get_outbox()
+    connection_backend = 'django_mail_viewer.backends.database.backend.EmailBackend'
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -96,7 +130,7 @@ class DatabaseBackendTest(TestCase):
         m = mail.EmailMultiAlternatives(
             'Email subject', 'Email text', 'test@example.com', ['to1@example.com', 'to2.example.com']
         )
-        with mail.get_connection('django_mail_viewer.backends.database.backend.EmailBackend') as connection:
+        with mail.get_connection(self.connection_backend) as connection:
             self.assertEqual(1, connection.send_messages([m]))
 
         self.assertEqual(original_email_count + 1, EmailMessage.objects.count())
@@ -133,7 +167,7 @@ class DatabaseBackendTest(TestCase):
         current_dir = Path(__file__).resolve().parent
         m.attach_file(current_dir / 'test_files' / 'icon.gif', 'image/gif')
 
-        with mail.get_connection('django_mail_viewer.backends.database.backend.EmailBackend') as connection:
+        with mail.get_connection(self.connection_backend) as connection:
             self.assertEqual(1, connection.send_messages([m]))
 
         # The main message, the multipart/alternative, the text/plain, the text/html, and the attached img/gif
@@ -212,3 +246,22 @@ class DatabaseBackendTest(TestCase):
                 self.assertEqual(current_test['attachment'], str(part.file_attachment))
 
         self.assertEqual(list(parts_test_matrix.keys()).sort(), tested_parts.sort())
+
+    def test_get_message(self):
+        """
+        Test using get_message() to look up a specific message.
+        """
+
+        with mail.get_connection(self.connection_backend) as connection:
+            send_plaintext_messages(2, connection)
+            self.assertEqual(2, EmailMessage.objects.count())
+            for m in EmailMessage.objects.filter(parent=None):
+                self.assertEqual(m, connection.get_message(m.message_id))
+
+    def test_get_outbox(self):
+        with mail.get_connection(self.connection_backend) as connection:
+            send_plaintext_messages(1, connection)
+            self.assertEqual(1, len(connection.get_outbox()))
+            send_plaintext_messages(1, connection)
+            self.assertEqual(2, len(connection.get_outbox()))
+
