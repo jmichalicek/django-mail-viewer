@@ -65,20 +65,20 @@ class LocMemBackendTest(SimpleTestCase):
             self.assertEqual(1, len(connection.get_outbox()))
             send_plaintext_messages(1, connection)
             self.assertEqual(2, len(connection.get_outbox()))
+            self.assertEqual(mail.outbox, connection.get_outbox())
 
 
 class CacheBackendTest(SimpleTestCase):
     """
     Test django_mail_viewer.backends.cache.EmailBackend
     """
-
+    maxDiff = None
     connection_backend = 'django_mail_viewer.backends.cache.EmailBackend'
 
     def setUp(self):
         # not sure this is the best way to do this, but it'll work for now
         self.mail_cache = cache.caches[settings.MAILVIEWER_CACHE]
         self.mail_cache.clear()
-        mail.outbox = []
 
     def test_send_messages_adds_message_to_cache(self):
         m = mail.EmailMultiAlternatives(
@@ -109,6 +109,12 @@ class CacheBackendTest(SimpleTestCase):
             self.assertEqual(1, len(connection.get_outbox()))
             send_plaintext_messages(1, connection)
             self.assertEqual(2, len(connection.get_outbox()))
+
+            # TODO: A better comparison of the objects. This works for now, though
+            message_cache_keys = cache.caches[settings.MAILVIEWER_CACHE].get(connection.cache_keys_key)
+            expected = [m.get('Message-ID') for m in cache.caches[settings.MAILVIEWER_CACHE].get_many(message_cache_keys).values()]
+            actual = [m.get('Message-ID') for m in connection.get_outbox()]
+            self.assertEqual(expected, actual)
 
 
 class DatabaseBackendTest(TestCase):
@@ -264,4 +270,5 @@ class DatabaseBackendTest(TestCase):
             self.assertEqual(1, len(connection.get_outbox()))
             send_plaintext_messages(1, connection)
             self.assertEqual(2, len(connection.get_outbox()))
+            self.assertEqual(list(EmailMessage.objects.all()), list(connection.get_outbox()))
 

@@ -19,7 +19,11 @@ class EmailBackend(BaseEmailBackend):
     def __init__(self, *args, **kwargs):
         super(EmailBackend, self).__init__(*args, **kwargs)
         self.cache = cache.caches[mailviewer_settings.MAILVIEWER_CACHE]
-        self.cache_keys_key = 'message_keys'  # a cache entry with a list of the rest of the cache keys
+        # a cache entry with a list of the rest of the cache keys
+        # This is so that if a distinct cache is not used for mail-viewer
+        # it will still play nicely in being able to return a list of
+        # all of the messages
+        self.cache_keys_key = 'message_keys'
 
     def send_messages(self, messages):
         msg_count = 0

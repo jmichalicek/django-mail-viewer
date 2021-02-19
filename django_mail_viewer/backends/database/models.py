@@ -94,7 +94,7 @@ class EmailMessage(AbstractBaseEmailMessage):
         if not self.parts.all().exists():
             # Or should I be saving a main message all the time and even just a plaintext has a child part, hmm
             return [self]
-        return self.parts.all()
+        return self.parts.all().order_by('-created_at', 'id')
 
     def get_param(self, param: str, failobj=None, header: str = 'content-type', unquote: bool = True) -> str:
         """
@@ -123,7 +123,11 @@ class EmailMessage(AbstractBaseEmailMessage):
         if not self.is_multipart():
             charset = self.get_param('charset')
             if self.file_attachment:
-                return self.file_attachment.read()
+                self.file_attachment.seek(0)
+                try:
+                    return self.file_attachment.read()
+                finally:
+                    self.file_attachment.seek(0)
             else:
                 # our content is a str but get_payload() returns bytes normally so we need to re-encode it... yeah.
                 return self.content.encode(charset)
