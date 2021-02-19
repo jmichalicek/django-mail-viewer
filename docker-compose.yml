@@ -1,0 +1,49 @@
+version: '3.7'
+services:
+  database:
+    image: "postgres:11.2"
+    environment:
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-developer}
+        - POSTGRES_USER=${POSTGRES_USER:-developer}
+        - POSTGRES_DB=${POSTGRES_DB:-django_mailviewer}
+        - PGDATA=${PGDATA:-/var/lib/postgresql/data/pgdata}
+    privileged: true
+    volumes:
+      - db:/var/lib/postgresql/data
+  redis:
+    image: 'redis:latest'
+    restart: on-failure
+    volumes:
+      - redis:/data
+  django:
+    image: django-mailviewer:dev
+    #command: /bin/bash -ic 'make setup-and-run'
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    depends_on:
+      - database
+      - redis
+    working_dir: /django/mailviewer/
+    # command: /home/developer/docker_entrypoints/dev_entrypoint.sh
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    environment:
+      - REDIS_HOST=redis
+      # - DJANGO_SETTINGS_MODULE=bash_shell_net.settings.local
+      - SHELL=/bin/bash
+      - DATABASE_URL=postgres://developer:developer@database:5432/django_mailviewer
+      - LOG_LEVEL=DEBUG
+    ports:
+      - "8000:8000"
+    restart: on-failure
+    volumes:
+      - .:/django/mailviewer/
+      - ~/.git-hooks:/django/.git-hooks:ro
+      - ~/.gitconfig:/django/.gitconfig:ro
+      - ~/.ssh:/django/.ssh:ro
+volumes:
+  db:
+  redis:

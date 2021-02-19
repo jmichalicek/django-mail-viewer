@@ -23,6 +23,7 @@ class SingleEmailMixin(object):
         message = None
         with mail.get_connection() as connection:
             message_id = self.kwargs.get('message_id')
+            # TODO: put this fiddling with brackets on the backend itself...
             message = connection.get_message(u'<%s>' % message_id)
         return message
 
@@ -34,6 +35,9 @@ class SingleEmailMixin(object):
         msg: email.message.Message object
         decode_file: Boolean whether to decode the base64 encoded file to an actual file or not
         """
+        # TODO: move this all to the email backend. It exists on the db backend already
+        # but maybe it could live on BaseEmailBackend - or just in a function not in a class
+        # because right now the database email backend is the only one which needs it
         content_disposition = message.get("Content-Disposition", None)
         if content_disposition:
             dispositions = content_disposition.strip().split(";")
@@ -65,9 +69,10 @@ class SingleEmailMixin(object):
                     elif name == "read-date":
                         attachment.read_date = value  # TODO: datetime
                 return {
+                    # 'filename': Path(message.get_filename()).name,  ??
                     'filename': message.get_filename(),
                     'content_type': message.get_content_type(),
-                    'file': attachment
+                    'file': attachment,
                 }
         return None
 
@@ -102,6 +107,7 @@ class EmailListView(TemplateView):
     """
     Display a list of sent emails.
     """
+
     template_name = 'mail_viewer/email_list.html'
 
     def get_context_data(self, **kwargs):
@@ -118,6 +124,7 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
     """
     Display details of an email
     """
+
     template_name = 'mail_viewer/email_detail.html'
 
     def get(self, request, *args, **kwargs):
@@ -135,9 +142,18 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
             outbox = connection.get_outbox()
 
         subject, text_body, html_body, sender, to, attachments = self._parse_email_parts(message, decode_files=False)
-        return super(EmailDetailView, self).get_context_data(lookup_id=lookup_id, message=message, text_body=text_body,
-                                                             html_body=html_body, subject=subject, sender=sender, to=to,
-                                                             attachments=attachments, outbox=outbox, **kwargs)
+        return super(EmailDetailView, self).get_context_data(
+            lookup_id=lookup_id,
+            message=message,
+            text_body=text_body,
+            html_body=html_body,
+            subject=subject,
+            sender=sender,
+            to=to,
+            attachments=attachments,
+            outbox=outbox,
+            **kwargs
+        )
 
 
 class EmailAttachmentDownloadView(SingleEmailMixin, View):
@@ -151,10 +167,11 @@ class EmailAttachmentDownloadView(SingleEmailMixin, View):
         requested = int(self.kwargs.get('attachment'))
         i = 0
         # TODO: de-nest this some
+        # TODO: use enumerate()...
         for part in message.walk():
             content_disposition = part.get("Content-Disposition", '')
             dispositions = content_disposition.strip().split(";")
-            if (content_disposition and dispositions[0].lower() == "attachment"):
+            if content_disposition and dispositions[0].lower() == "attachment":
                 if i == requested:
                     return self._parse_email_attachment(part, True)
                 i += 1

@@ -67,3 +67,20 @@ pypi-test:
 
 pypi:
 	twine upload dist/*
+
+setup-and-run:	setup migrate run
+
+venv:
+	 python -m venv .venv
+
+run:
+	python manage.py runserver 0.0.0.0:8000
+
+migrate:
+	python manage.py migrate
+
+dev:
+	docker-compose run --service-ports django /bin/bash
+
+install-mailviewer:
+	pip install -e /django/mailviewer --no-binary :all:

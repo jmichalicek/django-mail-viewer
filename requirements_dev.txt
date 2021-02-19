@@ -2,3 +2,4 @@ bumpversion
 wheel
 Django>=2.2.6
 twine
+python-magic
