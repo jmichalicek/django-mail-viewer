@@ -82,7 +82,6 @@ TODO
 * Redis backend using Redis specific functionality for cleaner code and less risk of bugs vs the django cache backend
 * Memcached backend
 * File based backend - store each email as its own file
-* Database backend - model to store emails and attachments
 * Other backends?  ElasticSearch?  MongoDB?
 * Separate views for each of html, plaintext, attachements, etc. to allow for more customization of display?
 

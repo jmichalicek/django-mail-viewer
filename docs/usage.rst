@@ -59,3 +59,26 @@ There are currentl two supported email backends with more planned.
     Similarly, using Django's dummy cache will result in no email being stored.  If you use one of Django's built in
     Database, Filesystem, or Memcached backends or a third party backend such as a Redis cache backend then
     you will have access to your email across processes and server restarts.
+
+**django_mail_viewer.backends.database.backend.EmailBackend**:
+    The cache backend makes use of Django's ORM to store email messages in the database. By default file attachments
+    are stored in your default media storage. You may want to implement your own model by subclassing `AbstractBaseEmailMessage`
+    to customize where file attachments are stored such as to put them in a separate private s3 bucket.
+
+    The database backend is in its own Django app so that the models and migrations can be ignored
+    if you do not intend to use this backend. To use it add mailviewer_database_backend to your `INSTALLED_APPS`:
+
+    .. code-block:: python
+
+        INSTALLED_APPS = (
+            ...
+            'django_mail_viewer',
+            'django_mail_viewer.backends.database.apps.DatabaseBackendConfig',
+            ...
+        )
+
+    Set your `EMAIL_BACKEND` in settings.py:
+
+    .. code-block:: python
+
+        EMAIL_BACKEND = 'django_mail_viewer.backends.database.backend.EmailBackend'
