@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django import template
 from django.utils.safestring import mark_safe
 
@@ -27,7 +25,7 @@ def message_lookup_id(message):
     making it inaccessible directly.
     """
 
-    return mark_safe(message.get('message-id', '').strip(u'<>'))
+    return mark_safe(message.get('message-id', '').strip('<>'))
 
 
 @register.simple_tag

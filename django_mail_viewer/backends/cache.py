@@ -17,7 +17,7 @@ class EmailBackend(BaseEmailBackend):
     """
 
     def __init__(self, *args, **kwargs):
-        super(EmailBackend, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.cache = cache.caches[mailviewer_settings.MAILVIEWER_CACHE]
         # a cache entry with a list of the rest of the cache keys
         # This is so that if a distinct cache is not used for mail-viewer
