@@ -1,6 +1,3 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-# email parsing
 from io import BytesIO
 
 from django.core import mail
@@ -14,7 +11,7 @@ except ImportError:
     from django.urls import reverse
 
 
-class SingleEmailMixin(object):
+class SingleEmailMixin:
     """
     Mixin for details for a single email
     """
@@ -24,7 +21,7 @@ class SingleEmailMixin(object):
         with mail.get_connection() as connection:
             message_id = self.kwargs.get('message_id')
             # TODO: put this fiddling with brackets on the backend itself...
-            message = connection.get_message(u'<%s>' % message_id)
+            message = connection.get_message(f'<{message_id}>')
         return message
 
     def _parse_email_attachment(self, message, decode_file=True):
@@ -117,7 +114,7 @@ class EmailListView(TemplateView):
         with mail.get_connection() as connection:
             # add a backend.get_outbox() for supporting multiple backends?
             outbox = connection.get_outbox()
-        return super(EmailListView, self).get_context_data(outbox=outbox, **kwargs)
+        return super().get_context_data(outbox=outbox, **kwargs)
 
 
 class EmailDetailView(SingleEmailMixin, TemplateView):
@@ -132,7 +129,7 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
         if not self.message:
             return HttpResponseRedirect(reverse('mail_viewer_list'))
 
-        return super(EmailDetailView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         lookup_id = kwargs.get('message_id')
@@ -142,7 +139,7 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
             outbox = connection.get_outbox()
 
         subject, text_body, html_body, sender, to, attachments = self._parse_email_parts(message, decode_files=False)
-        return super(EmailDetailView, self).get_context_data(
+        return super().get_context_data(
             lookup_id=lookup_id,
             message=message,
             text_body=text_body,

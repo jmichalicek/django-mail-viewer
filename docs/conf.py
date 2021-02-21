@@ -45,8 +45,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Django Mail Viewer'
-copyright = u'2016, Justin Michalicek'
+project = 'Django Mail Viewer'
+copyright = '2016, Justin Michalicek'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -191,8 +191,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'django-mail-viewer.tex', u'Django Mail Viewer Documentation',
-   u'Justin Michalicek', 'manual'),
+  ('index', 'django-mail-viewer.tex', 'Django Mail Viewer Documentation',
+   'Justin Michalicek', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -221,8 +221,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'django-mail-viewer', u'Django Mail Viewer Documentation',
-     [u'Justin Michalicek'], 1)
+    ('index', 'django-mail-viewer', 'Django Mail Viewer Documentation',
+     ['Justin Michalicek'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -235,8 +235,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'django-mail-viewer', u'Django Mail Viewer Documentation',
-   u'Justin Michalicek', 'django-mail-viewer', 'One line description of project.',
+  ('index', 'django-mail-viewer', 'Django Mail Viewer Documentation',
+   'Justin Michalicek', 'django-mail-viewer', 'One line description of project.',
    'Miscellaneous'),
 ]
 

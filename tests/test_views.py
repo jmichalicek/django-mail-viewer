@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, unicode_literals
-
 import os
 
 from django.core import mail
@@ -53,8 +51,8 @@ class EmailDetailViewTest(TestCase):
 
     def _get_detail_url(self, message_id=None):
         if not message_id:
-            message_id = mail.outbox[0].get(u'message-id')
-            message_id = message_id.strip(u'<>')
+            message_id = mail.outbox[0].get('message-id')
+            message_id = message_id.strip('<>')
         return reverse(self.URL_NAME, args=[message_id])
 
     def test_view_context(self):
@@ -82,7 +80,7 @@ class EmailDetailViewTest(TestCase):
         m.send()
 
         message_id = mail.outbox[0].get('message-id')
-        response = self.client.get(self._get_detail_url(message_id.strip(u'<>')))
+        response = self.client.get(self._get_detail_url(message_id.strip('<>')))
         self.assertEqual(200, response.status_code)
 
         self.assertEqual('Email 2 text', response.context['text_body'])
@@ -96,7 +94,7 @@ class EmailDetailViewTest(TestCase):
         }], response.context['attachments'])
         self.assertEqual(mail.outbox[0], response.context['message'])
         self.assertEqual(mail.outbox, response.context['outbox'])
-        self.assertEqual(response.context['lookup_id'], message_id.strip(u'<>'))
+        self.assertEqual(response.context['lookup_id'], message_id.strip('<>'))
 
     def test_missing_email_redirect_to_list(self):
         """
@@ -127,7 +125,7 @@ class EmailAttachmentDownloadViewTest(TestCase):
         m.attach_file(test_file_attachment, 'image/gif')
         m.send()
 
-        message_id = mail.outbox[0].get('message-id').strip(u'<>')
+        message_id = mail.outbox[0].get('message-id').strip('<>')
         response = self.client.get(reverse(self.URL_NAME, args=[message_id, 0]))
         self.assertEqual(200, response.status_code)
         self.assertEqual('image/gif', response['Content-Type'])

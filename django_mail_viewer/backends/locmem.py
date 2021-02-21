@@ -1,8 +1,6 @@
 """
 Backend for test environment.
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django.core import mail
 from django.core.mail.backends.base import BaseEmailBackend
 
@@ -19,7 +17,7 @@ class EmailBackend(BaseEmailBackend):
     """
 
     def __init__(self, *args, **kwargs):
-        super(EmailBackend, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if not hasattr(mail, 'outbox'):
             mail.outbox = []
 
