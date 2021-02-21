@@ -5,6 +5,10 @@ History
 
 Current
 +++++++
+* Dropped Python 3.5 and 2.7 support
+* Testing against Django 2.2 to 3.1
+* Dropped testing Django versions less than 2.2
+* Added new database backend which stores emails in a model in the database
 
 1.0.0 (2018-04-23)
 ++++++++++++++++++
