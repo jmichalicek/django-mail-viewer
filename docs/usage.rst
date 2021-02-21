@@ -81,4 +81,10 @@ There are currentl two supported email backends with more planned.
 
     .. code-block:: python
 
-        EMAIL_BACKEND = 'django_mail_viewer.backends.database.backend.EmailBackend'
+        EMAIL_BACKEND = 'django_mail_viewer.backends.database.EmailBackend'
+
+    If you are using your own model to store email then this model should also be specfied in the settings
+
+    .. code-block:: pythong
+
+      MAILVIEWER_DATABASE_BACKEND_MODEL = 'my_app.MyModel'
