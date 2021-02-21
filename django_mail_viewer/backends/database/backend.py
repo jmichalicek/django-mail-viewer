@@ -3,15 +3,11 @@ import json
 from io import BytesIO
 from pathlib import Path
 
+from django.apps import apps
 from django.core.files.base import ContentFile
 from django.core.mail.backends.base import BaseEmailBackend
 
 from ... import settings as mailviewer_settings
-
-# Because of the need for EmailMessage this stuff cannot go into or be imported
-# into __init__.py to give using this backend the same import structure as the
-# other backends
-from .models import EmailMessage
 
 
 class EmailBackend(BaseEmailBackend):
@@ -21,6 +17,10 @@ class EmailBackend(BaseEmailBackend):
     Uses a Django model to store sent emails so that they can be easily retrieved in multi-process environments such as
     using Django Channels or when sending an email from a python shell or for longer term storage and lookup.
     """
+
+    def __init__(self, *args, **kwargs):
+        self._backend_model = apps.get_model(mailviewer_settings.MAILVIEWER_DATABASE_BACKEND_MODEL)
+        super().__init__(*args, **kwargs)
 
     def _parse_email_attachment(self, message, decode_file=True):
         """
@@ -101,7 +101,7 @@ class EmailBackend(BaseEmailBackend):
                         content = ''
                         file_attachment = ''
                     message_id = part.get('message-id', '')  # do sub-parts have a message-id?
-                    p = EmailMessage(
+                    p = self._backend_model(
                         message_id=message_id,
                         content=content,
                         file_attachment=file_attachment,
@@ -113,7 +113,7 @@ class EmailBackend(BaseEmailBackend):
                         main_message = p
             else:
                 message_id = message.get('message-id')
-                main_message = EmailMessage(
+                main_message = self._backend_model(
                     message_id=message_id,
                     content=message.get_payload(),
                     message_headers=json.dumps(dict(message.items())),
@@ -132,11 +132,11 @@ class EmailBackend(BaseEmailBackend):
         # or should there be a layer in between or some sort of adapter pattern to make the db based email message
         # look/act like an email.message.Message? I lean towards just moving logic to the EmailBackend but may need
         # some combo of the two for the views/templates to work nicely.
-        return EmailMessage.objects.filter(message_id=lookup_id, parent=None).first()
+        return self._backend_model.objects.filter(message_id=lookup_id, parent=None).first()
 
     def get_outbox(self, *args, **kwargs):
         """
         Get the outbox used by this backend.  This backend returns a copy of mail.outbox.
         May add pagination args/kwargs.
         """
-        return EmailMessage.objects.filter(parent=None)
+        return self._backend_model.objects.filter(parent=None)

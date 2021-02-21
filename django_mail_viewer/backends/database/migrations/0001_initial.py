@@ -21,8 +21,8 @@ class Migration(migrations.Migration):
                 ('content', models.TextField(blank=True, default='')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('file_attachment', models.FileField(blank=True, default='', upload_to='mailviewer_attachments')),
-                ('parent', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='parts', to='mailviewer_database_backend.emailmessage')),
+                ('file_attachment', models.FileField(blank=True, default='', upload_to='mail_viewer_attachments')),
+                ('parent', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='parts', to='mail_viewer_database_backend.emailmessage')),
             ],
             options={
                 'db_table': 'mail_viewer_emailmessage',

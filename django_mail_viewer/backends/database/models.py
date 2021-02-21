@@ -2,7 +2,7 @@ import email.message
 import email.utils
 import json
 from email.charset import Charset
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Union
 
 from django.core.mail.backends.base import BaseEmailBackend
 from django.db import models
@@ -35,27 +35,8 @@ class AbstractBaseEmailMessage(models.Model):
     class Meta:
         abstract = True
 
-
-class EmailMessage(AbstractBaseEmailMessage):
-    """
-    Django model mimicking the minimal implementation of email.message.Message needed for django-mail-viewer.
-
-    An Email Message where the base message is stored in the database and attachments are stored in a `mailviewer_attachments/
-    directory in your default media storage..
-    To customize storage, subclass AbstractBaseEmailMessage and add a `FileField()` named `file_attachment`
-    with the storage you would like to use. This may be because the default media storage is public readable or
-    it just needs to be stored elsewhere, such as locally, or a different s3 bucket than the default storage.
-    """
-
-    file_attachment = models.FileField(blank=True, default='', upload_to='mailviewer_attachments')
-
-    class Meta:
-        db_table = 'mail_viewer_emailmessage'
-        ordering = ('id', )
-        indexes = [models.Index(fields=['message_id'])]
-
     # I really only need/use get_filename(), get_content_type(), get_payload(), walk()
-    def get(self, attr, failobj=None):
+    def get(self, attr: str, failobj=None):
         """
         Get a header value.
 
@@ -69,6 +50,9 @@ class EmailMessage(AbstractBaseEmailMessage):
             lower_attr = attr.lower()
             return vals.get(lower_attr, failobj)
         return failobj
+
+    def date(self) -> str:
+        return self.get('date')
 
     def is_multipart(self) -> bool:
         """
@@ -90,7 +74,7 @@ class EmailMessage(AbstractBaseEmailMessage):
         # not sure this is right...
         return self.headers()
 
-    def walk(self) -> 'models.QuerySet[EmailMessage]':
+    def walk(self) -> 'models.QuerySet[AbstractBaseEmailMessage]':
         if not self.parts.all().exists():
             # Or should I be saving a main message all the time and even just a plaintext has a child part, hmm
             return [self]
@@ -115,7 +99,9 @@ class EmailMessage(AbstractBaseEmailMessage):
                 return part_val
         return ''
 
-    def get_payload(self, i: int = None, decode: bool = False):
+    def get_payload(
+        self, i: int = None, decode: bool = False
+    ) -> 'Union[bytes, AbstractBaseEmailMessage, models.QuerySet[AbstractBaseEmailMessage]]':
         """
         Temporary backwards compatibility with email.message.Message
         """
@@ -154,3 +140,22 @@ class EmailMessage(AbstractBaseEmailMessage):
                 filename = part.split('=')[1].strip('"').strip()
                 return email.utils.unquote(filename)
         return ''
+
+
+class EmailMessage(AbstractBaseEmailMessage):
+    """
+    Django model mimicking the minimal implementation of email.message.Message needed for django-mail-viewer.
+
+    An Email Message where the base message is stored in the database and attachments are stored in a `mailviewer_attachments/
+    directory in your default media storage..
+    To customize storage, subclass AbstractBaseEmailMessage and add a `FileField()` named `file_attachment`
+    with the storage you would like to use. This may be because the default media storage is public readable or
+    it just needs to be stored elsewhere, such as locally, or a different s3 bucket than the default storage.
+    """
+
+    file_attachment = models.FileField(blank=True, default='', upload_to='mailviewer_attachments')
+
+    class Meta:
+        db_table = 'mail_viewer_emailmessage'
+        ordering = ('id',)
+        indexes = [models.Index(fields=['message_id'])]

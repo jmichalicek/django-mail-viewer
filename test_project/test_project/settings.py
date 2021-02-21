@@ -10,7 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
-EMAIL_BACKEND = 'django_mail_viewer.backends.database.backend.EmailBackend'
+EMAIL_BACKEND = 'django_mail_viewer.backends.database.EmailBackend'
+# EMAIL_BACKEND = 'django_mail_viewer.backends.cache.EmailBackend'
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+#         'LOCATION': '/tmp/django_cache',
+#     }
+# }
 
 from pathlib import Path
 
