@@ -142,7 +142,8 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
             # cache and database backends would function without brackets, although they would need to remove them
             # from the original data.
             connection.delete_message(f'<{message_id}>')
-        return HttpResponse(status=204)
+        # TODO: add hx-redirect header IF user is on this detail view
+        return HttpResponse('', status=200)
 
     def get_context_data(self, **kwargs):
         lookup_id = kwargs.get('message_id')

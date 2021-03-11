@@ -33,8 +33,9 @@
 				border-top: none;
 				border-bottom: 1px solid black;
 				margin: 0 0 2px;
-				padding: 10px 5px;
-				width: 100%:
+				padding: 0 5px;
+				width: 100%;
+        display: flex;
 			}
 			#main {
 				float: left;
@@ -43,6 +44,25 @@
 				padding: 0;
 				border: 1px solid black;
 			}
+
+      .delete-mail-link {
+        /* position: relative; */
+        /* right: 0%; */
+        width: 20%;
+        background-color: red;
+        opacity: 0;
+        height: relative;
+        padding: 10% 0;
+        text-align: center;
+      }
+      .delete-mail-link:hover {
+        opacity: 1;
+      }
+
+      .list-content {
+        width: 80%;
+        flex-grow: 1;
+      }
 		</style>
 		{% block 'css' %}{% endblock 'css' %}
   </head>
@@ -57,15 +77,18 @@
 							{% message_attribute message 'from' as sender %}
 							{% message_attribute message 'to' as recipient %}
 							{% message_attribute message 'date' as sent_date %}
-							<li>
-								<a href="{% url 'mail_viewer_detail' lookup_id %}">
-									<div class="email_list--list_item">
-										{{ subject }}<br>
-										From: {{ sender }}<br>
-										To: {{ recipient }}<br>
-										Sent: {{ sent_date }}
-									</div>
-								</a>
+							<li id="email_{{ lookup_id|slugify }}" class="email_list--list_item">
+                <div class="list-content">
+                  <a href="{% url 'mail_viewer_detail' lookup_id %}">
+                      {{ subject }}<br>
+                      From: {{ sender }}<br>
+                      To: {{ recipient }}<br>
+                      Sent: {{ sent_date }}
+                  </a>
+                </div>
+                <div class="delete-mail-link">
+                  <a  href="{% url 'mail_viewer_detail' lookup_id %}" hx-delete="{% url 'mail_viewer_detail' lookup_id %}" hx-target="closest li" hx-confirm="Delete this email?" hx-swap="outerHTML">Delete</a>
+                </div>
 							</li>
 						{% endfor %}
 					</ul>
@@ -77,5 +100,14 @@
 				</div>
 			{% endblock 'main' %}
 		{% endblock 'body' %}
+    {% block javascript %}
+      <script src="https://unpkg.com/htmx.org@1.3.1" integrity="sha384-fIzHaKYVrEFxI4/dWpMzf9tlIUPU0HmW8w/8s4nQHvZmGQhXhnEM6aenC6QFkd7e" crossorigin="anonymous"></script>
+      <script>
+        <!-- from https://www.mattlayman.com/blog/2021/how-to-htmx-django/ -->
+        document.body.addEventListener('htmx:configRequest', (event) => {
+          event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        })
+      </script>
+    {% endblock javascript %}
 	</body>
 </html>
