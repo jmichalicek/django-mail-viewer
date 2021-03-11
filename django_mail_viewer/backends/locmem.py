@@ -48,3 +48,16 @@ class EmailBackend(BaseEmailBackend):
         May add pagination args/kwargs.
         """
         return getattr(mail, 'outbox', [])[:]
+
+    def delete_message(self, message_id: str):
+        """
+        Remove the message with the given id from the mailbox
+        """
+        outbox = getattr(mail, 'outbox', [])
+        index_to_remove = None
+        for idx, message in enumerate(outbox):
+            if message.get('message-id') == message_id:
+                index_to_remove = idx
+                break
+        if index_to_remove is not None:
+            del outbox[index_to_remove]

@@ -131,6 +131,19 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
 
         return super().get(request, *args, **kwargs)
 
+    def delete(self, request, *args, **kwargs):
+        """
+        Delete the message from the outbox
+        """
+        # TODO: Should this be on its own view and support GET requests as well just to function with minimal javascript in the browser?
+        message_id = self.kwargs.get('message_id')
+        with mail.get_connection() as connection:
+            # TODO: put this fiddling with brackets on the backend itself...
+            # cache and database backends would function without brackets, although they would need to remove them
+            # from the original data.
+            connection.delete_message(f'<{message_id}>')
+        return HttpResponse(status=204)
+
     def get_context_data(self, **kwargs):
         lookup_id = kwargs.get('message_id')
         message = self.message
@@ -180,3 +193,4 @@ class EmailAttachmentDownloadView(SingleEmailMixin, View):
         response = HttpResponse(attachment['file'], content_type=attachment['content_type'])
         response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(attachment['filename'])
         return response
+

@@ -20,9 +20,9 @@ class EmailBackend(BaseEmailBackend):
         super().__init__(*args, **kwargs)
         self.cache = cache.caches[mailviewer_settings.MAILVIEWER_CACHE]
         # a cache entry with a list of the rest of the cache keys
-        # This is so that if a distinct cache is not used for mail-viewer
-        # it will still play nicely in being able to return a list of
-        # all of the messages
+        # This is for get_outbox() so that the system knows which cache keys are there
+        # to retrieve them. Django does not have a built in way to get the keys
+        # which exist in the cache.
         self.cache_keys_key = 'message_keys'
 
     def send_messages(self, messages):
@@ -35,7 +35,6 @@ class EmailBackend(BaseEmailBackend):
             # if multiple processes are updating this at the same time then
             # things will get hung up.  May introduce a lock key and spinlock
             # to avoid clobbering the value stored in the list of keys.
-            # Smarter solutions will be cache backend specific and possibly not much better
             current_cache_keys = self.cache.get(self.cache_keys_key)
             if not current_cache_keys:
                 current_cache_keys = []
@@ -59,7 +58,18 @@ class EmailBackend(BaseEmailBackend):
         # and passes those into get_many() to retrieve the keys
         message_keys = self.cache.get(self.cache_keys_key)
         if message_keys:
-            messages = self.cache.get_many(message_keys).values()
+            messages = list(self.cache.get_many(message_keys).values())
         else:
             messages = []
         return messages
+
+    def delete_message(self, message_id: str):
+        """
+        Remove the message with the given id from the mailbox
+        """
+        message_keys = self.cache.get(self.cache_keys_key, [])
+        message_keys.remove(message_id)
+        self.cache.set(self.cache_keys_key, message_keys)
+        self.cache.delete(message_id)
+
+

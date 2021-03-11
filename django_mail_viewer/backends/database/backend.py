@@ -1,4 +1,3 @@
-# Not sure I like this. Can I use apps.py to do this a cleaner way?
 import json
 from io import BytesIO
 from pathlib import Path
@@ -140,3 +139,9 @@ class EmailBackend(BaseEmailBackend):
         May add pagination args/kwargs.
         """
         return self._backend_model.objects.filter(parent=None)
+
+    def delete_message(self, message_id: str):
+        """
+        Remove the message with the given id from the mailbox
+        """
+        self._backend_model.objects.filter(message_id=message_id).delete()
