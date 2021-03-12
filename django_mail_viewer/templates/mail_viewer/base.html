@@ -69,7 +69,7 @@
 	<body>
 		{% block 'body' %}
 			{% block 'email_list' %}
-				<div class="email_list">
+				<div class="email_list" hx-boost="true">
 					<ul>
 						{% for message  in outbox %}
 							{% message_lookup_id message as lookup_id %}
@@ -79,7 +79,7 @@
 							{% message_attribute message 'date' as sent_date %}
 							<li id="email_{{ lookup_id|slugify }}" class="email_list--list_item">
                 <div class="list-content">
-                  <a href="{% url 'mail_viewer_detail' lookup_id %}">
+                  <a href="{% url 'mail_viewer_detail' lookup_id %}" hx-target="#main">
                       {{ subject }}<br>
                       From: {{ sender }}<br>
                       To: {{ recipient }}<br>
@@ -87,7 +87,7 @@
                   </a>
                 </div>
                 <div class="delete-mail-link">
-                  <a  href="{% url 'mail_viewer_detail' lookup_id %}" hx-delete="{% url 'mail_viewer_detail' lookup_id %}" hx-target="closest li" hx-confirm="Delete this email?" hx-swap="outerHTML">Delete</a>
+                  <a  href="{% url 'mail_viewer_delete' lookup_id %}" hx-post="{% url 'mail_viewer_delete' lookup_id %}" hx-target="closest li" hx-confirm="Delete this email?" hx-swap="outerHTML">Delete</a>
                 </div>
 							</li>
 						{% endfor %}

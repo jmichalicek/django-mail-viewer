@@ -124,26 +124,19 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
 
     template_name = 'mail_viewer/email_detail.html'
 
+    def get_template_names(self):
+        if self.request.headers.get('hx-request'):
+            return ['mail_viewer/email_detail_content_fragment.html']
+        return super().get_template_names()
+
     def get(self, request, *args, **kwargs):
         self.message = self.get_message()
         if not self.message:
+            # Instead of default self.get() behavior and letting get_message() raise 404
+            # because I want to stay within mailviewer and not dump out to a system's 404 page.
             return HttpResponseRedirect(reverse('mail_viewer_list'))
 
         return super().get(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        """
-        Delete the message from the outbox
-        """
-        # TODO: Should this be on its own view and support GET requests as well just to function with minimal javascript in the browser?
-        message_id = self.kwargs.get('message_id')
-        with mail.get_connection() as connection:
-            # TODO: put this fiddling with brackets on the backend itself...
-            # cache and database backends would function without brackets, although they would need to remove them
-            # from the original data.
-            connection.delete_message(f'<{message_id}>')
-        # TODO: add hx-redirect header IF user is on this detail view
-        return HttpResponse('', status=200)
 
     def get_context_data(self, **kwargs):
         lookup_id = kwargs.get('message_id')
@@ -163,7 +156,7 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
             to=to,
             attachments=attachments,
             outbox=outbox,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -195,3 +188,59 @@ class EmailAttachmentDownloadView(SingleEmailMixin, View):
         response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(attachment['filename'])
         return response
 
+
+class EmailDeleteView(SingleEmailMixin, TemplateView):
+    """
+    Delete an email. Works like Django's DeleteView but its not tied
+    to a model.
+    """
+
+    template_name = 'mail_viewer/email_delete.html'
+
+    def get_context_data(self, **kwargs):
+        lookup_id = kwargs.get('message_id')
+        message = self.message
+
+        with mail.get_connection() as connection:
+            outbox = connection.get_outbox()
+
+        subject, text_body, html_body, sender, to, attachments = self._parse_email_parts(message, decode_files=False)
+        return super().get_context_data(
+            lookup_id=lookup_id,
+            message=message,
+            text_body=text_body,
+            html_body=html_body,
+            subject=subject,
+            sender=sender,
+            to=to,
+            attachments=attachments,
+            outbox=outbox,
+            **kwargs,
+        )
+
+    def get(self, request, *args, **kwargs):
+        self.message = self.get_message()
+        if not self.message:
+            # Instead of default self.get() behavior and letting get_message() raise 404
+            # because I want to stay within mailviewer and not dump out to a system's 404 page.
+            return HttpResponseRedirect(reverse('mail_viewer_list'))
+
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Delete the message from the outbox
+        """
+        # TODO: Should this be on its own view and support GET requests as well just to function with minimal javascript in the browser?
+        message_id = self.kwargs.get('message_id')
+        with mail.get_connection() as connection:
+            pass
+            # TODO: put this fiddling with brackets on the backend itself...
+            # cache and database backends would function without brackets, although they would need to remove them
+            # from the original data.
+            connection.delete_message(f'<{message_id}>')
+
+        # apparently htmx POST requests do not send as XmlHttpRequest?
+        if request.is_ajax() or request.headers.get('hx-request'):
+            return HttpResponse('', status=200)
+        return HttpResponseRedirect(reverse('mail_viewer_list'))
