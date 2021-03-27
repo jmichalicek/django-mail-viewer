@@ -2,69 +2,155 @@
 <html>
 	<head>
 		<title>{% block 'title' %}Django Mail Viewer - Email List{% endblock 'title' %}</title>
-		<style>
-			html { height: 100%; }
-			body {
-				height: 100%;
-				margin: 0 10px 0;
-				padding: 0;
-			}
-			h3 {
-				margin: 0;
-			}
-			.email_list {
-				float: left;
-				width: 20%;
-				padding: 0 0 0;
-				height: 100%;
-				border-top: 1px solid black;
-			  border-left: 1px solid black;
-				border-bottom: 1px solid black;
-				margin: 0;
-				overflow: auto;
-			}
-			.email_list > ul {
-				margin: 0;
-				list-style: none;
-				width: 100%;
-				padding: 0;
-			}
-			.email_list--list_item {
-				border-top: none;
-				border-bottom: 1px solid black;
-				margin: 0 0 2px;
-				padding: 0 5px;
-				width: 100%;
-        display: flex;
-			}
-			#main {
-				float: left;
-				width: 70%;
-				height: 100%;
-				padding: 0;
-				border: 1px solid black;
-			}
+    {% block 'css' %}
+      <style>
+        html { height: 100%; }
+        body {
+          height: 100%;
+          margin: 0 10px 0;
+          padding: 0;
+        }
 
-      .delete-mail-link {
-        /* position: relative; */
-        /* right: 0%; */
-        width: 20%;
-        background-color: red;
-        opacity: 0;
-        height: relative;
-        padding: 10% 0;
-        text-align: center;
-      }
-      .delete-mail-link:hover {
-        opacity: 1;
-      }
+        h3 {
+          margin: 0;
+        }
 
-      .list-content {
-        width: 80%;
-        flex-grow: 1;
-      }
-		</style>
-		{% block 'css' %}{% endblock 'css' %}
+        .email_list {
+          float: left;
+          width: 20%;
+          padding: 0 0 0;
+          height: 100%;
+          border-top: 1px solid black;
+          border-left: 1px solid black;
+          border-bottom: 1px solid black;
+          margin: 0;
+          overflow: auto;
+        }
+
+        .email_list > ul {
+          margin: 0;
+          list-style: none;
+          width: 100%;
+          padding: 0;
+        }
+
+        .email_list--list_item {
+          border-top: none;
+          border-bottom: 1px solid black;
+          margin: 0 0 2px;
+          padding: 0;
+          display: flex;
+        }
+
+        #main {
+          float: left;
+          width: 70%;
+          height: 100%;
+          padding: 0;
+          border: 1px solid black;
+        }
+
+        .delete-mail-link {
+          width: 20%;
+          background-color: red;
+          opacity: 0;
+          height: relative;
+          padding: 10% 0;
+          text-align: center;
+        }
+
+        .delete-mail-link:hover {
+          opacity: 1;
+        }
+
+        .list-content {
+          width: 80%;
+          flex-grow: 1;
+          padding-left: 5px;
+        }
+
+        {# detail page css #}
+        .header_info {
+          height: 175px;
+          margin-left: 10px;
+        }
+
+        .email__body {
+          height: calc(100% - 175px);
+        }
+
+        .email__attachments {
+          margin: 5px 0;
+        }
+
+        .tab_pane {
+          border: none;
+          margin: 0 auto;
+          height: 100%;
+          padding-right: 1px;
+          overflow: scroll;
+        }
+
+        .tabs {
+          list-style: none;
+          padding: 0;
+          margin: 10px 0 0;
+          border-bottom: none;
+          height: 27px;
+        }
+
+        .tabs li { display: inline; }
+        .tabs li a {
+          color: black;
+          float: left;
+          display: block;
+          padding: 4px 10px;
+          margin-left: -1px;
+          position: relative;
+          left: 1px;
+          background: white;
+          text-decoration: none;
+          border: 1px solid black;
+          border-bottom: none;
+          border-radius: 5% 5% 0 0;
+        }
+        .tabs.active {
+          background: #ccc;
+        }
+        .tabs li a:hover, .tabs li a.active { background: #ccc; }
+        .tabs::after {
+          content:"";
+          display:table;
+          clear:both;
+        }
+
+        .tabs__panes {
+          height: calc(100% - 37px);
+          border: 1px solid black;
+          border-left: none;
+          border-right: none;
+          border-bottom: none;
+        }
+
+        .tab_pane.email__body--html > iframe {
+          width: 100%;
+          height: 100%;
+          border: none;
+          margin-bottom: 1px;
+        }
+        .tab_pane.email__body--text, .tab_pane.email__body--raw-html {
+          padding: 5px 5px;
+        }
+
+        .wrapper {
+          height: 100%;
+        }
+      </style>
+	  {% endblock 'css' %}
+
+    {% block javascript %}
+      <script async src="https://unpkg.com/htmx.org@1.3.1" integrity="sha384-fIzHaKYVrEFxI4/dWpMzf9tlIUPU0HmW8w/8s4nQHvZmGQhXhnEM6aenC6QFkd7e" crossorigin="anonymous"></script>
+    {% endblock javascript %}
   </head>
 	<body>
 		{% block 'body' %}
@@ -96,18 +182,52 @@
 			{% endblock 'email_list' %}
 			{% block 'main' %}
 				<div id="main">
-					{% block 'main_content' %}{% endblock 'main_content' %}
+					{% block 'main_content' %}
+          <div style="text-align: center; padding: 10% 0;">
+            <h1>Django Mail Viewer</h1>
+            <p>There currently are no emails</p>
+          </div>
+          {% endblock 'main_content' %}
 				</div>
 			{% endblock 'main' %}
-		{% endblock 'body' %}
-    {% block javascript %}
-      <script src="https://unpkg.com/htmx.org@1.3.1" integrity="sha384-fIzHaKYVrEFxI4/dWpMzf9tlIUPU0HmW8w/8s4nQHvZmGQhXhnEM6aenC6QFkd7e" crossorigin="anonymous"></script>
+      {% block body_javascript %}
       <script>
-        <!-- from https://www.mattlayman.com/blog/2021/how-to-htmx-django/ -->
-        document.body.addEventListener('htmx:configRequest', (event) => {
-          event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-        })
-      </script>
-    {% endblock javascript %}
+          <!-- from https://www.mattlayman.com/blog/2021/how-to-htmx-django/ -->
+          document.body.addEventListener('htmx:configRequest', (event) => {
+            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+          });
+
+          function bindTabs() {
+            var tabs = document.querySelectorAll('a.tab');
+            var tabPanes = document.querySelectorAll('.tabs__panes > div');
+            for(var i=0; i<tabs.length; i++) {
+              console.log('binding tab clicks!')
+              tabs[i].onclick = function (e) {
+                var target = document.querySelector(e.currentTarget.dataset.target);
+                for(var x=0; x<tabs.length; x++) {
+                  tabs[x].classList.remove('active');
+                }
+                for(var x=0; x<tabPanes.length; x++) {
+                  tabPanes[x].style.display = "none";
+                }
+                target.style.display = "block";
+                e.currentTarget.classList.add('active');
+              };
+            }
+
+            // display only the first tab pane
+            for(var i=1; i<tabPanes.length; i++) {
+              tabPanes[i].style.display = "none";
+            }
+          }
+
+          bindTabs();
+          document.body.addEventListener('htmxEmailLoaded', (event) => {
+            bindTabs();
+          });
+        </script>
+      {% endblock body_javascript %}
+		{% endblock 'body' %}
 	</body>
+
 </html>

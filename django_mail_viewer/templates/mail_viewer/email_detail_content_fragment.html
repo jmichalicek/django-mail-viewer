@@ -48,27 +48,4 @@
     </div>
   </div>
 </div>
-<script>
-  (function () {
-    var tabs = document.querySelectorAll('a.tab');
-    var tabPanes = document.querySelectorAll('.tabs__panes > div');
-    for(var i=0; i<tabs.length; i++) {
-      tabs[i].onclick = function (e) {
-        var target = document.querySelector(e.currentTarget.dataset.target);
-        for(var x=0; x<tabs.length; x++) {
-          tabs[x].classList.remove('active');
-        }
-        for(var x=0; x<tabPanes.length; x++) {
-          tabPanes[x].style.display = "none";
-        }
-        target.style.display = "block";
-        e.currentTarget.classList.add('active');
-      };
-    }
 
-    // display only the first tab pane
-    for(var i=1; i<tabPanes.length; i++) {
-      tabPanes[i].style.display = "none";
-    }
-  })();
-</script>

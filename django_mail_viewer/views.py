@@ -136,7 +136,9 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
             # because I want to stay within mailviewer and not dump out to a system's 404 page.
             return HttpResponseRedirect(reverse('mail_viewer_list'))
 
-        return super().get(request, *args, **kwargs)
+        response = super().get(request, *args, **kwargs)
+        response['HX-Trigger-After-Swap'] = 'htmxEmailLoaded'
+        return response
 
     def get_context_data(self, **kwargs):
         lookup_id = kwargs.get('message_id')
@@ -242,5 +244,10 @@ class EmailDeleteView(SingleEmailMixin, TemplateView):
 
         # apparently htmx POST requests do not send as XmlHttpRequest?
         if request.is_ajax() or request.headers.get('hx-request'):
-            return HttpResponse('', status=200)
-        return HttpResponseRedirect(reverse('mail_viewer_list'))
+            response = HttpResponse('', status=200)
+            current_url = request.META.get('HTTP_HX_CURRENT_URL', '')
+            if message_id in current_url:
+                response['HX-Redirect'] = reverse('mail_viewer_list')
+        else:
+            response = HttpResponseRedirect(reverse('mail_viewer_list'))
+        return response
