@@ -1,0 +1,51 @@
+{% load mail_viewer_tags %}
+<div class="wrapper">
+  <div class="header_info">
+    <h3>{{ subject }}</h3>
+    From: {{ sender }};<br>
+    To: {{ to }}<br>
+    CC: {{ message.cc }}<br>
+    BCC: {{  message.bcc  }}<br>
+    Sent on: {{ message.date }}<br>
+    Content-Type: {% display_message_attribute message 'Content-Type' %}<br>
+    Message-ID: {% display_message_attribute message 'Message-ID' %}<br>
+  </div>
+  <div class="email__body">
+    <ul class="tabs">
+      <li><a href="#" class="tab active" data-target=".email__body--html">HTML</a></li>
+      <li><a href="#" class="tab" data-target=".email__body--raw-html">Raw HTML</a></li>
+      <li><a href="#" class="tab" data-target=".email__body--text">Plain Text</a></li>
+      <li><a href="#" class="tab" data-target=".email__attachments">Attachments</a></li>
+    </ul>
+    <div class="tabs__panes">
+      <div class="tab_pane email__body--html">
+        <iframe srcdoc="{{ html_body }}" sandbox></iframe>
+      </div>
+      <div class="tab_pane email__body--raw-html">
+        <pre>{% if html_body %}{{ html_body }}{% endif %}</pre>
+      </div>
+      <div class="tab_pane email__body--text">
+        <p>
+          {{ text_body }}<br>
+        </p>
+      </div>
+      <div class="tab_pane email__attachments">
+        <ul>
+          {% for attachment in attachments %}
+            <li>
+              <p>
+                file: <a href="{% url 'mail_viewer_attachment' message_id=lookup_id attachment=forloop.counter0 %}">{{ attachment.filename }}</a><br>
+                content-type: {{ attachment.content_type }}<br>
+              </p>
+            </li>
+          {% empty %}
+            <li>
+              <p>No attachments</p>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+

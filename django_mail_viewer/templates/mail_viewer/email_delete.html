@@ -1,0 +1,16 @@
+{% extends 'mail_viewer/base.html' %}
+{% load mail_viewer_tags %}
+{% block 'title' %}Django Mail Viewer - Delete Email{% endblock 'title' %}
+{% block 'main_content' %}
+{% message_lookup_id message as lookup_id %}
+<div class="wrapper" style="text-align: center; height: relative; padding: 10% 0;">
+  <h3>{{ subject }}</h3>
+  <p>
+    Sent: {{ message.date }}
+  </p>
+  <form action="{% url 'mail_viewer_delete' lookup_id %}" method="POST">
+    {% csrf_token %}
+    <button type="submit">Delete</button>
+  </form>
+</div>
+{% endblock 'main_content' %}

@@ -65,11 +65,25 @@ class LocMemBackendTest(SimpleTestCase):
             self.assertEqual(2, len(connection.get_outbox()))
             self.assertEqual(mail.outbox, connection.get_outbox())
 
+    def test_delete_message(self):
+        """
+        Test the delete() method of the backend deletes the message from the outbox
+        """
+        with mail.get_connection('django_mail_viewer.backends.locmem.EmailBackend') as connection:
+            send_plaintext_messages(3, connection)
+            target_message = connection.get_outbox()[1]
+            target_id = target_message.get('message-id')
+            connection.delete_message(target_id)
+            self.assertEqual(2, len(connection.get_outbox()))
+            for message in connection.get_outbox():
+                self.assertNotEqual(target_id, message.get('message-id'), f'Message with id {target_id} found in outbox after delete.')
+
 
 class CacheBackendTest(SimpleTestCase):
     """
     Test django_mail_viewer.backends.cache.EmailBackend
     """
+
     maxDiff = None
     connection_backend = 'django_mail_viewer.backends.cache.EmailBackend'
 
@@ -110,9 +124,25 @@ class CacheBackendTest(SimpleTestCase):
 
             # TODO: A better comparison of the objects. This works for now, though
             message_cache_keys = cache.caches[settings.MAILVIEWER_CACHE].get(connection.cache_keys_key)
-            expected = [m.get('Message-ID') for m in cache.caches[settings.MAILVIEWER_CACHE].get_many(message_cache_keys).values()]
+            expected = [
+                m.get('Message-ID')
+                for m in cache.caches[settings.MAILVIEWER_CACHE].get_many(message_cache_keys).values()
+            ]
             actual = [m.get('Message-ID') for m in connection.get_outbox()]
             self.assertEqual(expected, actual)
+
+    def test_delete_message(self):
+        """
+        Test the delete() method of the backend deletes the message from the outbox
+        """
+        with mail.get_connection(self.connection_backend) as connection:
+            send_plaintext_messages(3, connection)
+            target_message = connection.get_outbox()[1]
+            target_id = target_message.get('message-id')
+            connection.delete_message(target_id)
+            self.assertEqual(2, len(connection.get_outbox()))
+            for message in connection.get_outbox():
+                self.assertNotEqual(target_id, message.get('message-id'), f'Message with id {target_id} found in outbox after delete.')
 
 
 class DatabaseBackendTest(TestCase):
@@ -165,7 +195,8 @@ class DatabaseBackendTest(TestCase):
         )
 
         m.attach_alternative(
-            '<html><body><p style="background-color: #AABBFF; color: white">Email html</p></body></html>', 'text/html',
+            '<html><body><p style="background-color: #AABBFF; color: white">Email html</p></body></html>',
+            'text/html',
         )
 
         current_dir = Path(__file__).resolve().parent
@@ -193,7 +224,10 @@ class DatabaseBackendTest(TestCase):
                 'parent': None,
             },
             'multipart/alternative': {
-                'headers': {'Content-Type': 'multipart/alternative', 'MIME-Version': '1.0',},
+                'headers': {
+                    'Content-Type': 'multipart/alternative',
+                    'MIME-Version': '1.0',
+                },
                 'content': '',
                 'attachment': '',
                 'parent': email,
@@ -270,3 +304,15 @@ class DatabaseBackendTest(TestCase):
             self.assertEqual(2, len(connection.get_outbox()))
             self.assertEqual(list(EmailMessage.objects.all()), list(connection.get_outbox()))
 
+    def test_delete_message(self):
+        """
+        Test the delete() method of the backend deletes the message from the outbox
+        """
+        with mail.get_connection(self.connection_backend) as connection:
+            send_plaintext_messages(3, connection)
+            target_message = connection.get_outbox()[1]
+            target_id = target_message.get('message-id')
+            connection.delete_message(target_id)
+            self.assertEqual(2, len(connection.get_outbox()))
+            for message in connection.get_outbox():
+                self.assertNotEqual(target_id, message.get('message-id'), f'Message with id {target_id} found in outbox after delete.')
