@@ -7,6 +7,7 @@ try:
     root_dir = Path(__file__).resolve().parent
 
     settings.configure(
+        DEFAULT_AUTO_FIELD='django.db.models.AutoField',
         DEBUG=True,
         USE_TZ=True,
         # TODO: test on multiple database backends?
