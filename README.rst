@@ -38,17 +38,9 @@ Add Django Mail Viewer's URL patterns:
 
     # You may want to only include this in development environments
 
-    # Django 2
     urlpatterns = [
         ...
         path('', include('django_mail_viewer.urls')),
-        ...
-    ]
-
-    # Django 1.11
-    urlpatterns = [
-        ...
-        url(r'^', include('django_mail_viewer.urls')),
         ...
     ]
 
