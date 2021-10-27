@@ -2,7 +2,7 @@ import email.message
 import email.utils
 import json
 from email.charset import Charset
-from typing import Tuple, Dict, Union
+from typing import Dict, Union, List, Any
 
 from django.core.mail.backends.base import BaseEmailBackend
 from django.db import models
@@ -36,7 +36,8 @@ class AbstractBaseEmailMessage(models.Model):
         abstract = True
 
     # I really only need/use get_filename(), get_content_type(), get_payload(), walk()
-    def get(self, attr: str, failobj=None):
+    # returns Any due to failovj
+    def get(self, attr: str, failobj: Any = None) -> Any:
         """
         Get a header value.
 
@@ -74,7 +75,7 @@ class AbstractBaseEmailMessage(models.Model):
         # not sure this is right...
         return self.headers()
 
-    def walk(self) -> 'models.QuerySet[AbstractBaseEmailMessage]':
+    def walk(self) -> 'Union[models.QuerySet[AbstractBaseEmailMessage], List[AbstractBaseEmailMessage]]':
         if not self.parts.all().exists():
             # Or should I be saving a main message all the time and even just a plaintext has a child part, hmm
             return [self]
