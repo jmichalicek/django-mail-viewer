@@ -3,11 +3,7 @@ import os
 from django.core import mail
 from django.test import SimpleTestCase
 from django.test.utils import override_settings
-
-try:
-    from django.core.urlresolvers import reverse
-except ImportError:
-    from django.urls import reverse
+from django.urls import reverse
 
 
 @override_settings(EMAIL_BACKEND='django_mail_viewer.backends.locmem.EmailBackend')

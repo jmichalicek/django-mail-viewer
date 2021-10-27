@@ -2,13 +2,9 @@ from io import BytesIO
 
 from django.core import mail
 from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.urls import reverse
 from django.utils.encoding import smart_str
 from django.views.generic.base import TemplateView, View
-
-try:
-    from django.core.urlresolvers import reverse
-except ImportError:
-    from django.urls import reverse
 
 
 class SingleEmailMixin:
