@@ -1,10 +1,8 @@
 import email.message
 import email.utils
 import json
-from email.charset import Charset
-from typing import Tuple, Dict, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
-from django.core.mail.backends.base import BaseEmailBackend
 from django.db import models
 
 
@@ -35,8 +33,17 @@ class AbstractBaseEmailMessage(models.Model):
     class Meta:
         abstract = True
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # methods here expect the concrete subclasses to implement the file_attachment field
+        # should only be necessary until django 2.2 support is dropped... I hope
+        if TYPE_CHECKING and not hasattr(self, 'file_attachment'):
+            self.file_attachment = models.FileField(blank=True, default='', upload_to='mailviewer_attachments')
+
     # I really only need/use get_filename(), get_content_type(), get_payload(), walk()
-    def get(self, attr: str, failobj=None):
+    # returns Any due to failobj
+    def get(self, attr: str, failobj: Any = None) -> Any:
         """
         Get a header value.
 
@@ -59,7 +66,7 @@ class AbstractBaseEmailMessage(models.Model):
         Returns True if the message is multipart
         """
         # Not certain the self.parts.all() is accurate
-        return self.get_content_type() == 'rfc/822' or self.parts.all().exists()
+        return self.get_content_type() == 'rfc/822' or self.parts.exists()  # type: ignore
 
     def headers(self) -> Dict[str, str]:
         """
@@ -74,11 +81,11 @@ class AbstractBaseEmailMessage(models.Model):
         # not sure this is right...
         return self.headers()
 
-    def walk(self) -> 'models.QuerySet[AbstractBaseEmailMessage]':
-        if not self.parts.all().exists():
+    def walk(self) -> 'Union[models.QuerySet[AbstractBaseEmailMessage], List[AbstractBaseEmailMessage]]':
+        if not self.parts.all().exists():  # type: ignore
             # Or should I be saving a main message all the time and even just a plaintext has a child part, hmm
             return [self]
-        return self.parts.all().order_by('-created_at', 'id')
+        return self.parts.all().order_by('-created_at', 'id')  # type: ignore
 
     def get_param(self, param: str, failobj=None, header: str = 'content-type', unquote: bool = True) -> str:
         """
@@ -118,7 +125,7 @@ class AbstractBaseEmailMessage(models.Model):
                 # our content is a str but get_payload() returns bytes normally so we need to re-encode it... yeah.
                 return self.content.encode(charset)
 
-        parts = self.parts.all()
+        parts = self.parts.all()  # type: ignore
         if i:
             return parts[i]
         return parts
@@ -147,7 +154,8 @@ class EmailMessage(AbstractBaseEmailMessage):
     Django model mimicking the minimal implementation of email.message.Message needed for django-mail-viewer.
 
     An Email Message where the base message is stored in the database and attachments are stored in a `mailviewer_attachments/
-    directory in your default media storage..
+    directory in your default media storage.
+
     To customize storage, subclass AbstractBaseEmailMessage and add a `FileField()` named `file_attachment`
     with the storage you would like to use. This may be because the default media storage is public readable or
     it just needs to be stored elsewhere, such as locally, or a different s3 bucket than the default storage.
