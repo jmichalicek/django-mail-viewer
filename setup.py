@@ -4,7 +4,7 @@ import sys
 
 from setuptools import find_packages, setup
 
-version = '1.0.0'
+version = '2.0.0'
 
 if sys.argv[-1] == 'publish':
     try:
@@ -47,6 +47,7 @@ setup(
         'Framework :: Django :: 3.0',
         'Framework :: Django :: 3.1',
         'Framework :: Django :: 3.2',
+        'Framework :: Django :: 4.0',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',

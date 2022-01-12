@@ -239,7 +239,8 @@ class EmailDeleteView(SingleEmailMixin, TemplateView):
             connection.delete_message(f'<{message_id}>')
 
         # apparently htmx POST requests do not send as XmlHttpRequest?
-        if request.is_ajax() or request.headers.get('hx-request'):
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+        if is_ajax or request.headers.get('hx-request'):
             response = HttpResponse('', status=200)
             current_url = request.META.get('HTTP_HX_CURRENT_URL', '')
             if message_id in current_url:
