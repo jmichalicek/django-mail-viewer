@@ -19,7 +19,7 @@
     </ul>
     <div class="tabs__panes">
       <div class="tab_pane email__body--html">
-        <iframe srcdoc="{{ html_body }}" sandbox></iframe>
+        <iframe srcdoc="{{ html_body }}" sandbox="allow-same-origin"></iframe>
       </div>
       <div class="tab_pane email__body--raw-html">
         <pre>{% if html_body %}{{ html_body }}{% endif %}</pre>

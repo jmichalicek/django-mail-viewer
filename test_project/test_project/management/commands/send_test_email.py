@@ -16,15 +16,15 @@ class Command(BaseCommand):
         parser.add_argument('-a', '--attach-file', nargs='?', type=str, required=False)
 
     def handle(self, *args, **options):
-        # Todo, send an html email
-        # send_mail(
-        #     'Subject here', 'Here is the message.', 'from@example.com', ['to@example.com'], fail_silently=False,
-        # )
         m = mail.EmailMultiAlternatives(
             'Subject here', 'The message in text/plain', 'test@example.com', ['to@example.com']
         )
         m.attach_alternative(
-            '<html><body><p style="background-color: #AABBFF; color: white">The message as text/html</p></body></html>',
+            '<html><head>'
+            '<style>'
+            '@font-face {font-family: SourceCodePro; src: url(/static/fonts/SourceCodePro-Light.otf);}'
+            '</style>'
+            '</head><body><p style="font-family: SourceCodePro; background-color: #AABBFF; color: white">The message as text/html</p></body></html>',
             'text/html',
         )
         attach_file = options.get('attach_file', '')

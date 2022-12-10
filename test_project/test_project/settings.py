@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+import os
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 EMAIL_BACKEND = 'django_mail_viewer.backends.database.EmailBackend'
@@ -118,3 +119,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = (
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static'),
+)
