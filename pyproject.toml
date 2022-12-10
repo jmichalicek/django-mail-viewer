@@ -1,6 +1,10 @@
 [tool.mypy]
 plugins = ["mypy_django_plugin.main"]
-exclude = 'migrations'
+# for some reason this is not following the ignore of the settings file...
+exclude = [
+  'migrations',
+  'test_project\/test_project\/settings\.py'
+]
 
 [tool.django-stubs]
 django_settings_module = "test_project.test_project.settings"

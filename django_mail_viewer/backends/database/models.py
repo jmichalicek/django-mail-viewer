@@ -107,7 +107,7 @@ class AbstractBaseEmailMessage(models.Model):
         return ''
 
     def get_payload(
-        self, i: int = None, decode: bool = False
+        self, i: Union[int, None] = None, decode: bool = False
     ) -> 'Union[bytes, AbstractBaseEmailMessage, models.QuerySet[AbstractBaseEmailMessage]]':
         """
         Temporary backwards compatibility with email.message.Message
@@ -143,7 +143,6 @@ class AbstractBaseEmailMessage(models.Model):
         parts = content_disposition.split(';')
         for part in parts:
             if part.strip().startswith('filename'):
-                fname = part.split('=')[1]
                 filename = part.split('=')[1].strip('"').strip()
                 return email.utils.unquote(filename)
         return ''

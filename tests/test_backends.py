@@ -4,7 +4,6 @@ Test django_mail_viewer.backends
 import json
 import shutil
 from pathlib import Path
-from django.core.mail import send_mail
 
 from django.conf import settings
 from django.core import cache, mail
@@ -76,7 +75,9 @@ class LocMemBackendTest(SimpleTestCase):
             connection.delete_message(target_id)
             self.assertEqual(2, len(connection.get_outbox()))
             for message in connection.get_outbox():
-                self.assertNotEqual(target_id, message.get('message-id'), f'Message with id {target_id} found in outbox after delete.')
+                self.assertNotEqual(
+                    target_id, message.get('message-id'), f'Message with id {target_id} found in outbox after delete.'
+                )
 
 
 class CacheBackendTest(SimpleTestCase):
@@ -142,7 +143,9 @@ class CacheBackendTest(SimpleTestCase):
             connection.delete_message(target_id)
             self.assertEqual(2, len(connection.get_outbox()))
             for message in connection.get_outbox():
-                self.assertNotEqual(target_id, message.get('message-id'), f'Message with id {target_id} found in outbox after delete.')
+                self.assertNotEqual(
+                    target_id, message.get('message-id'), f'Message with id {target_id} found in outbox after delete.'
+                )
 
 
 class DatabaseBackendTest(TestCase):
@@ -315,4 +318,6 @@ class DatabaseBackendTest(TestCase):
             connection.delete_message(target_id)
             self.assertEqual(2, len(connection.get_outbox()))
             for message in connection.get_outbox():
-                self.assertNotEqual(target_id, message.get('message-id'), f'Message with id {target_id} found in outbox after delete.')
+                self.assertNotEqual(
+                    target_id, message.get('message-id'), f'Message with id {target_id} found in outbox after delete.'
+                )

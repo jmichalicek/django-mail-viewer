@@ -2,7 +2,7 @@ from pathlib import Path
 import shutil
 
 from django.conf import settings
-from django.core import cache, mail
+from django.core import mail
 from django.test import TestCase
 
 from django_mail_viewer.backends.database.models import EmailMessage
@@ -19,7 +19,8 @@ class DatabaseBackendEmailMessageTest(TestCase):
         )
 
         m.attach_alternative(
-            '<html><body><p style="background-color: #AABBFF; color: white">Email html</p></body></html>', 'text/html',
+            '<html><body><p style="background-color: #AABBFF; color: white">Email html</p></body></html>',
+            'text/html',
         )
 
         current_dir = Path(__file__).resolve().parent
@@ -54,8 +55,8 @@ class DatabaseBackendEmailMessageTest(TestCase):
 
         with mail.get_connection(self.connection_backend) as connection:
             mail.EmailMultiAlternatives(
-                f'Not multipart',
-                f'Not multipart',
+                'Not multipart',
+                'Not multipart',
                 'test@example.com',
                 ['to1@example.com', 'to2.example.com'],
                 connection=connection,
@@ -86,4 +87,3 @@ class DatabaseBackendEmailMessageTest(TestCase):
     def test_get_filename(self):
         m = self.multipart_message.parts.exclude(file_attachment='').get()
         self.assertEqual('icon.gif', m.get_filename())
-
