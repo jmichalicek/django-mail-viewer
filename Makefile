@@ -80,7 +80,9 @@ migrate:
 	python manage.py migrate
 
 dev:
-	docker-compose run --service-ports django /bin/bash
+	docker compose run --service-ports django /bin/bash
+shell:
+	docker compose exec django /bin/bash
 
 install-mailviewer:
 	pip install -e /django/mailviewer --no-binary :all:

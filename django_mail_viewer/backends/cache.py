@@ -71,5 +71,3 @@ class EmailBackend(BaseEmailBackend):
         message_keys.remove(message_id)
         self.cache.set(self.cache_keys_key, message_keys)
         self.cache.delete(message_id)
-
-

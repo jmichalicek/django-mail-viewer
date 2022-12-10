@@ -1,1 +1,1 @@
-from .backend import EmailBackend
+from .backend import EmailBackend  # noqa: F401
