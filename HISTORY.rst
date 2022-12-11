@@ -2,8 +2,14 @@
 
 History
 -------
+2.1
++++++++
+* Added `allow-same-source-origin` to iframe sandbox so that things like `@font-face` can function on localhost
+* Added testing on Django 4.1 and Python 3.11
+* Stopped testing on old versions of Python and Django which had already been dropped from setup.py
+* Some type hinting fixes
 
-Current
+2.0
 +++++++
 * Dropped Python 3.5 and 2.7 support
 * Testing against Django 2.2 to 3.1
