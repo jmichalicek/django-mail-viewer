@@ -4,7 +4,7 @@ import sys
 
 from setuptools import find_packages, setup
 
-version = '2.0.0'
+version = '2.1.0'
 
 if sys.argv[-1] == 'publish':
     try:
@@ -43,11 +43,9 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'Framework :: Django',
-        'Framework :: Django :: 2.2',
-        'Framework :: Django :: 3.0',
-        'Framework :: Django :: 3.1',
         'Framework :: Django :: 3.2',
         'Framework :: Django :: 4.0',
+        'Framework :: Django :: 4.1',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
@@ -56,5 +54,6 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
     ],
 )
