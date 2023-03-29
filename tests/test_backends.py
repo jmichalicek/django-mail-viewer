@@ -3,6 +3,8 @@ Test django_mail_viewer.backends
 """
 import json
 import shutil
+import threading
+import time
 from pathlib import Path
 
 from django.conf import settings
@@ -146,6 +148,66 @@ class CacheBackendTest(SimpleTestCase):
                 self.assertNotEqual(
                     target_id, message.get('message-id'), f'Message with id {target_id} found in outbox after delete.'
                 )
+
+    def test_cache_lock(self):
+        """
+        Test that the cache_lock() method works with multiple threads.
+        """
+        results = []
+        concurrency = 5
+        with mail.get_connection(self.connection_backend) as connection:
+            def concurrent(results):
+                try:
+                    myid = "123-%s" % threading.current_thread().ident
+                    with connection.cache_lock("test-lock", myid, 10) as acquired:
+                        if acquired:
+                            results.append(True)
+                            time.sleep(1)
+                        else:
+                            results.append(False)
+                except Exception:
+                    results.append(False)
+            threads = []
+            for i in range(concurrency):
+                threads.append(threading.Thread(target=concurrent, args=(results,)))
+            for t in threads:
+                # start processing concurrent(results) in multiple threads
+                t.start()
+            for t in threads:
+                # wait for all threads to finish
+                t.join()
+
+        # Only one thread should have acquired the lock
+        self.assertEqual(concurrency, len(results))
+        self.assertEqual(1, len([val for val in results if val]))
+
+    def test_concurrent_send_messages_with_cache_lock(self):
+        """
+        Test that multiple messages sent simultaneously are added to the cache.
+        """
+        messages = []
+        for i in range(3, 8):
+            m = mail.EmailMultiAlternatives(
+                f'Email {i} subject', f'Email {i} text', 'test_multi@example.com', [f'to{i}@example.com']
+            )
+            messages.append(m)
+        with mail.get_connection(self.connection_backend) as connection:
+            self.mail_cache.delete(connection.cache_keys_key)
+            self.assertIsNone(self.mail_cache.get(connection.get_outbox()))
+            threads = []
+            for m in messages:
+                threads.append(threading.Thread(target=connection.send_messages, args=([m],)))
+            for t in threads:
+                t.start()
+            for t in threads:
+                # wait for all threads to finish
+                t.join()
+            cache_keys = self.mail_cache.get(connection.cache_keys_key)
+            self.assertEqual(5, len(cache_keys))
+            original_messages_before_message_id = [m.message().as_string().split('Message-ID:')[0] for m in messages]
+            for key in cache_keys:
+                sent_message_before_message_id = self.mail_cache.get(key).as_string().split('Message-ID:')[0]
+                self.assertIn(sent_message_before_message_id, original_messages_before_message_id)
 
 
 class DatabaseBackendTest(TestCase):
