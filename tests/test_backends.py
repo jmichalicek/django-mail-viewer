@@ -165,28 +165,28 @@ class CacheBackendTest(SimpleTestCase):
                             time.sleep(1)
                         else:
                             results.append(False)
-                except:
+                except Exception:
                     results.append(False)
             threads = []
             for i in range(concurrency):
                 threads.append(threading.Thread(target=concurrent, args=(results,)))
             for t in threads:
-                #start processing concurrent(results) in multiple threads
+                # start processing concurrent(results) in multiple threads
                 t.start()
             for t in threads:
-                #wait for all threads to finish
+                # wait for all threads to finish
                 t.join()
-            
+
         # Only one thread should have acquired the lock
         self.assertEqual(concurrency, len(results))
         self.assertEqual(1, len([val for val in results if val]))
 
     def test_concurrent_send_messages_with_cache_lock(self):
         """
-        Tests that multiple messages sent simultaneously are added to the cache.
+        Test that multiple messages sent simultaneously are added to the cache.
         """
         messages = []
-        for i in range(3,8):
+        for i in range(3, 8):
             m = mail.EmailMultiAlternatives(
                 f'Email {i} subject', f'Email {i} text', 'test_multi@example.com', [f'to{i}@example.com']
             )
@@ -200,10 +200,11 @@ class CacheBackendTest(SimpleTestCase):
             for t in threads:
                 t.start()
             for t in threads:
+                # wait for all threads to finish
                 t.join()
             cache_keys = self.mail_cache.get(connection.cache_keys_key)
             self.assertEqual(5, len(cache_keys))
-            original_messages_before_message_id = [m.message().as_string().split('Message-ID:')[0] for m in messages] 
+            original_messages_before_message_id = [m.message().as_string().split('Message-ID:')[0] for m in messages]
             for key in cache_keys:
                 sent_message_before_message_id = self.mail_cache.get(key).as_string().split('Message-ID:')[0]
                 self.assertIn(sent_message_before_message_id, original_messages_before_message_id)
