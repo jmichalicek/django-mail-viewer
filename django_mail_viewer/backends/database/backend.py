@@ -62,9 +62,9 @@ class EmailBackend(BaseEmailBackend):
                     elif name == "read-date":
                         attachment.read_date = value  # TODO: datetime
                 return {
-                    'filename': Path(message.get_filename()).name,
-                    'content_type': message.get_content_type(),
-                    'file': attachment,
+                    "filename": Path(message.get_filename()).name,
+                    "content_type": message.get_content_type(),
+                    "file": attachment,
                 }
         return None
 
@@ -76,11 +76,11 @@ class EmailBackend(BaseEmailBackend):
             if message.is_multipart():
                 # TODO: Should this really be done recursively? I believe forwarded emails may
                 # have multiple layers of parts/dispositions
-                message_id = message.get('message-id')
+                message_id = message.get("message-id")
                 main_message = None
                 for i, part in enumerate(message.walk()):
                     content_type = part.get_content_type()
-                    charset = part.get_param('charset')
+                    charset = part.get_param("charset")
                     # handle attachments - probably need to look at SingleEmailMixin._parse_email_attachment()
                     # and make that more reusable
                     content_disposition = part.get("Content-Disposition", None)
@@ -88,18 +88,18 @@ class EmailBackend(BaseEmailBackend):
                         # attachment_data = part.get_payload(decode=True)
                         attachment_data = self._parse_email_attachment(part)
                         file_attachment = ContentFile(
-                            attachment_data.get('file').read(), name=attachment_data.get('filename', 'attachment')
+                            attachment_data.get("file").read(), name=attachment_data.get("filename", "attachment")
                         )
-                        content = ''
-                    elif content_type in ['text/plain', 'text/html']:
-                        content = part.get_payload(decode=True).decode(charset, errors='replace')
-                        file_attachment = ''
+                        content = ""
+                    elif content_type in ["text/plain", "text/html"]:
+                        content = part.get_payload(decode=True).decode(charset, errors="replace")
+                        file_attachment = ""
                     else:
                         # the main multipart/alternative message for multipart messages has no content/payload
                         # TODO: handle file attachments
-                        content = ''
-                        file_attachment = ''
-                    message_id = part.get('message-id', '')  # do sub-parts have a message-id?
+                        content = ""
+                        file_attachment = ""
+                    message_id = part.get("message-id", "")  # do sub-parts have a message-id?
                     p = self._backend_model(
                         message_id=message_id,
                         content=content,
@@ -111,7 +111,7 @@ class EmailBackend(BaseEmailBackend):
                     if i == 0:
                         main_message = p
             else:
-                message_id = message.get('message-id')
+                message_id = message.get("message-id")
                 main_message = self._backend_model(
                     message_id=message_id,
                     content=message.get_payload(),

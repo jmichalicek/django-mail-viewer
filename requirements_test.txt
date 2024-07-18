@@ -7,4 +7,5 @@ tox-gh-actions
 django-stubs
 mypy
 typing-extensions
+black
 # Additional test requirements go here
