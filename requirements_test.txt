@@ -8,4 +8,5 @@ django-stubs
 mypy
 typing-extensions
 black
+ruff
 # Additional test requirements go here
