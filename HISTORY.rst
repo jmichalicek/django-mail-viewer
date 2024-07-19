@@ -2,6 +2,10 @@
 
 History
 -------
+2.2.0
++++++++
+* Added cache lock to prevent errors when using the cache backend with multiple processes by @jimcooley
+
 2.1
 +++++++
 * Added `allow-same-source-origin` to iframe sandbox so that things like `@font-face` can function on localhost
