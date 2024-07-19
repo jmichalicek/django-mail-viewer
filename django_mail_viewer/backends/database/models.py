@@ -19,13 +19,13 @@ class AbstractBaseEmailMessage(models.Model):
     # Technically optional, but really should be there according to RFC 5322 section 3.6.4
     # and Django always creates the message_id on the main part of the message so we know
     # it will be there, but not for all sub-parts of a multi-part message
-    message_id = models.CharField(max_length=250, blank=True, default='')
+    message_id = models.CharField(max_length=250, blank=True, default="")
     # Would love to make message_headers be a JSONField, but do not want to tie this to
     # postgres only.
     message_headers = models.TextField()
-    content = models.TextField(blank=True, default='')
+    content = models.TextField(blank=True, default="")
     parent = models.ForeignKey(
-        'self', blank=True, null=True, default=None, related_name='parts', on_delete=models.CASCADE
+        "self", blank=True, null=True, default=None, related_name="parts", on_delete=models.CASCADE
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -38,8 +38,8 @@ class AbstractBaseEmailMessage(models.Model):
 
         # methods here expect the concrete subclasses to implement the file_attachment field
         # should only be necessary until django 2.2 support is dropped... I hope
-        if TYPE_CHECKING and not hasattr(self, 'file_attachment'):
-            self.file_attachment = models.FileField(blank=True, default='', upload_to='mailviewer_attachments')
+        if TYPE_CHECKING and not hasattr(self, "file_attachment"):
+            self.file_attachment = models.FileField(blank=True, default="", upload_to="mailviewer_attachments")
 
     # I really only need/use get_filename(), get_content_type(), get_payload(), walk()
     # returns Any due to failobj
@@ -59,14 +59,14 @@ class AbstractBaseEmailMessage(models.Model):
         return failobj
 
     def date(self) -> str:
-        return self.get('date')
+        return self.get("date")
 
     def is_multipart(self) -> bool:
         """
         Returns True if the message is multipart
         """
         # Not certain the self.parts.all() is accurate
-        return self.get_content_type() == 'rfc/822' or self.parts.exists()  # type: ignore
+        return self.get_content_type() == "rfc/822" or self.parts.exists()  # type: ignore
 
     def headers(self) -> Dict[str, str]:
         """
@@ -81,13 +81,13 @@ class AbstractBaseEmailMessage(models.Model):
         # not sure this is right...
         return self.headers()
 
-    def walk(self) -> 'Union[models.QuerySet[AbstractBaseEmailMessage], List[AbstractBaseEmailMessage]]':
+    def walk(self) -> "Union[models.QuerySet[AbstractBaseEmailMessage], List[AbstractBaseEmailMessage]]":
         if not self.parts.all().exists():  # type: ignore
             # Or should I be saving a main message all the time and even just a plaintext has a child part, hmm
             return [self]
-        return self.parts.all().order_by('-created_at', 'id')  # type: ignore
+        return self.parts.all().order_by("-created_at", "id")  # type: ignore
 
-    def get_param(self, param: str, failobj=None, header: str = 'content-type', unquote: bool = True) -> str:
+    def get_param(self, param: str, failobj=None, header: str = "content-type", unquote: bool = True) -> str:
         """
         Return the value of the Content-Type header’s parameter param as a string. If the message has no Content-Type header or if there is no such parameter, then failobj is returned (defaults to None).
 
@@ -97,24 +97,24 @@ class AbstractBaseEmailMessage(models.Model):
         # TODO: error handling skipped for sure here... need to see what the real email message does
         # Should also consider using cgi.parse_header
         h = self.get(header)
-        params = h.split(';')
+        params = h.split(";")
         for part in params[1:]:
-            part_name, part_val = part.split('=')
+            part_name, part_val = part.split("=")
             part_name = part_name.strip()
             part_val = part_val.strip()
             if part_name == param:
                 return part_val
-        return ''
+        return ""
 
     def get_payload(
         self, i: Union[int, None] = None, decode: bool = False
-    ) -> 'Union[bytes, AbstractBaseEmailMessage, models.QuerySet[AbstractBaseEmailMessage]]':
+    ) -> "Union[bytes, AbstractBaseEmailMessage, models.QuerySet[AbstractBaseEmailMessage]]":
         """
         Temporary backwards compatibility with email.message.Message
         """
         # TODO: sort out type hint for return value here. Maybe use monkeytype to figure this out.
         if not self.is_multipart():
-            charset = self.get_param('charset')
+            charset = self.get_param("charset")
             if self.file_attachment:
                 self.file_attachment.seek(0)
                 try:
@@ -134,18 +134,18 @@ class AbstractBaseEmailMessage(models.Model):
         """
         Return's the message's content-type or mime type.
         """
-        h = self.get('content-type')
-        params = h.split(';')
+        h = self.get("content-type")
+        params = h.split(";")
         return params[0]
 
     def get_filename(self, failobj=None) -> str:
-        content_disposition = self.headers().get('Content-Disposition', '')
-        parts = content_disposition.split(';')
+        content_disposition = self.headers().get("Content-Disposition", "")
+        parts = content_disposition.split(";")
         for part in parts:
-            if part.strip().startswith('filename'):
-                filename = part.split('=')[1].strip('"').strip()
+            if part.strip().startswith("filename"):
+                filename = part.split("=")[1].strip('"').strip()
                 return email.utils.unquote(filename)
-        return ''
+        return ""
 
 
 class EmailMessage(AbstractBaseEmailMessage):
@@ -160,9 +160,9 @@ class EmailMessage(AbstractBaseEmailMessage):
     it just needs to be stored elsewhere, such as locally, or a different s3 bucket than the default storage.
     """
 
-    file_attachment = models.FileField(blank=True, default='', upload_to='mailviewer_attachments')
+    file_attachment = models.FileField(blank=True, default="", upload_to="mailviewer_attachments")
 
     class Meta:
-        db_table = 'mail_viewer_emailmessage'
-        ordering = ('id',)
-        indexes = [models.Index(fields=['message_id'])]
+        db_table = "mail_viewer_emailmessage"
+        ordering = ("id",)
+        indexes = [models.Index(fields=["message_id"])]

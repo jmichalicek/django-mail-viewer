@@ -1,6 +1,7 @@
 """
 Backend for test environment.
 """
+
 from contextlib import contextmanager
 from os import getpid
 from time import monotonic, sleep
@@ -27,14 +28,14 @@ class EmailBackend(BaseEmailBackend):
         # This is for get_outbox() so that the system knows which cache keys are there
         # to retrieve them. Django does not have a built in way to get the keys
         # which exist in the cache.
-        self.cache_keys_key = 'message_keys'
-        self.cache_keys_lock_key = 'message_keys_lock'
+        self.cache_keys_key = "message_keys"
+        self.cache_keys_lock_key = "message_keys_lock"
 
     def send_messages(self, messages):
         msg_count = 0
         for message in messages:
             m = message.message()
-            message_id = m.get('message-id')
+            message_id = m.get("message-id")
             self.cache.set(message_id, m)
 
             # Use a lock key and spinlock
@@ -57,7 +58,7 @@ class EmailBackend(BaseEmailBackend):
                         msg_count += 1
                         is_stored = True
                     else:
-                        sleep(.01)
+                        sleep(0.01)
         return msg_count
 
     def get_message(self, lookup_id):

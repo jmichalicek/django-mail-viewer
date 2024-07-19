@@ -72,6 +72,7 @@ setup-and-run:	setup migrate run
 
 venv:
 	 python -m venv .venv
+	 pip install --upgrade pip wheel setuptools
 
 run:
 	python manage.py runserver 0.0.0.0:8000
@@ -81,8 +82,21 @@ migrate:
 
 dev:
 	docker compose run --service-ports django /bin/bash
+
 shell:
 	docker compose exec django /bin/bash
 
 install-mailviewer:
 	pip install -e /django/mailviewer --no-binary :all:
+
+black:
+	black django_mail_viewer tests test_project
+
+black-check:
+	black --check --diff django_mail_viewer tests test_project
+
+ruff:
+	ruff check django_mail_viewer --fix
+
+ruff-check:
+	ruff check django_mail_viewer

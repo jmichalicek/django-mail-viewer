@@ -1,4 +1,4 @@
-FROM python:3.7-buster AS dev
+FROM python:3.8-bookworm AS dev
 # Dockerfile for running a test django installation
 LABEL maintainer="Justin Michalicek <jmichalicek@gmail.com>"
 ENV PYTHONUNBUFFERED 1
@@ -8,7 +8,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteract
   software-properties-common \
   sudo \
   vim \
-  telnet \
   postgresql-client \
   && apt-get autoremove && apt-get clean
 

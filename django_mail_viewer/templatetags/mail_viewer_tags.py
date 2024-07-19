@@ -25,7 +25,7 @@ def message_lookup_id(message):
     making it inaccessible directly.
     """
 
-    return mark_safe(message.get('message-id', '').strip('<>'))
+    return mark_safe(message.get("message-id", "").strip("<>"))
 
 
 @register.simple_tag

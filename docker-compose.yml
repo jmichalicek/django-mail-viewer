@@ -1,4 +1,3 @@
-version: '3.7'
 services:
   database:
     image: "postgres:11.2"
@@ -17,7 +16,6 @@ services:
       - redis:/data
   django:
     image: django-mailviewer:dev
-    #command: /bin/bash -ic 'make setup-and-run'
     command: /bin/bash
     stdin_open: true
     tty: true
@@ -25,14 +23,12 @@ services:
       - database
       - redis
     working_dir: /django/mailviewer/
-    # command: /home/developer/docker_entrypoints/dev_entrypoint.sh
     build:
       context: .
       dockerfile: Dockerfile
       target: dev
     environment:
       - REDIS_HOST=redis
-      # - DJANGO_SETTINGS_MODULE=bash_shell_net.settings.local
       - SHELL=/bin/bash
       - DATABASE_URL=postgres://developer:developer@database:5432/django_mailviewer
       - LOG_LEVEL=DEBUG
@@ -41,9 +37,8 @@ services:
     restart: on-failure
     volumes:
       - .:/django/mailviewer/
-      - ~/.git-hooks:/django/.git-hooks:ro
-      - ~/.gitconfig:/django/.gitconfig:ro
-      - ~/.ssh:/django/.ssh:ro
+      - ~/.gitconfig:/django/.gitconfig
+      - ~/.ssh:/django/.ssh
 volumes:
   db:
   redis:
