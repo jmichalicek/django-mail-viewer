@@ -15,9 +15,9 @@ class SingleEmailMixin:
     def get_message(self):
         message = None
         with mail.get_connection() as connection:
-            message_id = self.kwargs.get('message_id')
+            message_id = self.kwargs.get("message_id")
             # TODO: put this fiddling with brackets on the backend itself...
-            message = connection.get_message(f'<{message_id}>')
+            message = connection.get_message(f"<{message_id}>")
         return message
 
     def _parse_email_attachment(self, message, decode_file=True):
@@ -63,9 +63,9 @@ class SingleEmailMixin:
                         attachment.read_date = value  # TODO: datetime
                 return {
                     # 'filename': Path(message.get_filename()).name,  ??
-                    'filename': message.get_filename(),
-                    'content_type': message.get_content_type(),
-                    'file': attachment,
+                    "filename": message.get_filename(),
+                    "content_type": message.get_content_type(),
+                    "file": attachment,
                 }
         return None
 
@@ -79,20 +79,20 @@ class SingleEmailMixin:
             attachment = self._parse_email_attachment(part, decode_files)
             if attachment:
                 attachments.append(attachment)
-            elif part.get_content_type() == 'text/plain':
+            elif part.get_content_type() == "text/plain":
                 # should we get the default charset from the system if no charset?
                 # decode=True handles quoted printable and base64 encoded data
-                charset = part.get_param('charset')
-                body = part.get_payload(decode=True).decode(charset, errors='replace')
-            elif part.get_content_type() == 'text/html':
+                charset = part.get_param("charset")
+                body = part.get_payload(decode=True).decode(charset, errors="replace")
+            elif part.get_content_type() == "text/html":
                 # original code set html to '' if it was None and then appended
                 # as if we might have multiple html parts which are just one html message?
-                charset = part.get_param('charset')
-                html = part.get_payload(decode=True).decode(charset, errors='replace')
+                charset = part.get_param("charset")
+                html = part.get_payload(decode=True).decode(charset, errors="replace")
 
-        subject = message.get('subject')
-        msg_from = message.get('from')
-        to = message.get('to')
+        subject = message.get("subject")
+        msg_from = message.get("from")
+        to = message.get("to")
         return (subject, body, html, msg_from, to, attachments)
 
 
@@ -101,7 +101,7 @@ class EmailListView(TemplateView):
     Display a list of sent emails.
     """
 
-    template_name = 'mail_viewer/email_list.html'
+    template_name = "mail_viewer/email_list.html"
 
     def get_context_data(self, **kwargs):
         # TODO: need to make a custom backend which sets a predictable message-id header.
@@ -118,11 +118,11 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
     Display details of an email
     """
 
-    template_name = 'mail_viewer/email_detail.html'
+    template_name = "mail_viewer/email_detail.html"
 
     def get_template_names(self):
-        if self.request.headers.get('hx-request'):
-            return ['mail_viewer/email_detail_content_fragment.html']
+        if self.request.headers.get("hx-request"):
+            return ["mail_viewer/email_detail_content_fragment.html"]
         return super().get_template_names()
 
     def get(self, request, *args, **kwargs):
@@ -130,14 +130,14 @@ class EmailDetailView(SingleEmailMixin, TemplateView):
         if not self.message:
             # Instead of default self.get() behavior and letting get_message() raise 404
             # because I want to stay within mailviewer and not dump out to a system's 404 page.
-            return HttpResponseRedirect(reverse('mail_viewer_list'))
+            return HttpResponseRedirect(reverse("mail_viewer_list"))
 
         response = super().get(request, *args, **kwargs)
-        response['HX-Trigger-After-Swap'] = 'htmxEmailLoaded'
+        response["HX-Trigger-After-Swap"] = "htmxEmailLoaded"
         return response
 
     def get_context_data(self, **kwargs):
-        lookup_id = kwargs.get('message_id')
+        lookup_id = kwargs.get("message_id")
         message = self.message
 
         with mail.get_connection() as connection:
@@ -166,24 +166,24 @@ class EmailAttachmentDownloadView(SingleEmailMixin, View):
     def get_attachment(self, message):
         # TODO: eventually will need to handle different ways of having these
         # atachments stored.  Probably handle that on the EmailBackend class
-        requested = int(self.kwargs.get('attachment'))
+        requested = int(self.kwargs.get("attachment"))
         i = 0
         # TODO: de-nest this some
         # TODO: use enumerate()...
         for part in message.walk():
-            content_disposition = part.get("Content-Disposition", '')
+            content_disposition = part.get("Content-Disposition", "")
             dispositions = content_disposition.strip().split(";")
             if content_disposition and dispositions[0].lower() == "attachment":
                 if i == requested:
                     return self._parse_email_attachment(part, True)
                 i += 1
-        raise Http404('Attachment not found')
+        raise Http404("Attachment not found")
 
     def get(self, request, *args, **kwargs):
         message = self.get_message()
         attachment = self.get_attachment(message)
-        response = HttpResponse(attachment['file'], content_type=attachment['content_type'])
-        response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(attachment['filename'])
+        response = HttpResponse(attachment["file"], content_type=attachment["content_type"])
+        response["Content-Disposition"] = "attachment; filename=%s" % smart_str(attachment["filename"])
         return response
 
 
@@ -193,10 +193,10 @@ class EmailDeleteView(SingleEmailMixin, TemplateView):
     to a model.
     """
 
-    template_name = 'mail_viewer/email_delete.html'
+    template_name = "mail_viewer/email_delete.html"
 
     def get_context_data(self, **kwargs):
-        lookup_id = kwargs.get('message_id')
+        lookup_id = kwargs.get("message_id")
         message = self.message
 
         with mail.get_connection() as connection:
@@ -221,7 +221,7 @@ class EmailDeleteView(SingleEmailMixin, TemplateView):
         if not self.message:
             # Instead of default self.get() behavior and letting get_message() raise 404
             # because I want to stay within mailviewer and not dump out to a system's 404 page.
-            return HttpResponseRedirect(reverse('mail_viewer_list'))
+            return HttpResponseRedirect(reverse("mail_viewer_list"))
 
         return super().get(request, *args, **kwargs)
 
@@ -230,21 +230,21 @@ class EmailDeleteView(SingleEmailMixin, TemplateView):
         Delete the message from the outbox
         """
         # TODO: Should this be on its own view and support GET requests as well just to function with minimal javascript in the browser?
-        message_id = self.kwargs.get('message_id')
+        message_id = self.kwargs.get("message_id")
         with mail.get_connection() as connection:
             pass
             # TODO: put this fiddling with brackets on the backend itself...
             # cache and database backends would function without brackets, although they would need to remove them
             # from the original data.
-            connection.delete_message(f'<{message_id}>')
+            connection.delete_message(f"<{message_id}>")
 
         # apparently htmx POST requests do not send as XmlHttpRequest?
-        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
-        if is_ajax or request.headers.get('hx-request'):
-            response = HttpResponse('', status=200)
-            current_url = request.META.get('HTTP_HX_CURRENT_URL', '')
+        is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+        if is_ajax or request.headers.get("hx-request"):
+            response = HttpResponse("", status=200)
+            current_url = request.META.get("HTTP_HX_CURRENT_URL", "")
             if message_id in current_url:
-                response['HX-Redirect'] = reverse('mail_viewer_list')
+                response["HX-Redirect"] = reverse("mail_viewer_list")
         else:
-            response = HttpResponseRedirect(reverse('mail_viewer_list'))
+            response = HttpResponseRedirect(reverse("mail_viewer_list"))
         return response

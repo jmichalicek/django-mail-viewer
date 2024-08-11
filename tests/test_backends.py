@@ -1,6 +1,7 @@
 """
 Test django_mail_viewer.backends
 """
+
 import json
 import shutil
 import threading
@@ -18,10 +19,10 @@ from typing import Any
 def send_plaintext_messages(count: int, connection: Any):
     for x in range(count):
         mail.EmailMultiAlternatives(
-            f'Email subject {x}',
-            f'Email text {x}',
-            'test@example.com',
-            ['to1@example.com', 'to2.example.com'],
+            f"Email subject {x}",
+            f"Email text {x}",
+            "test@example.com",
+            ["to1@example.com", "to2.example.com"],
             connection=connection,
         ).send()
 
@@ -31,7 +32,7 @@ class LocMemBackendTest(SimpleTestCase):
     Test django_mail_viewer.backends.locmem.EmailBackend
     """
 
-    connection_backend = 'django_mail_viewer.backends.locmem.EmailBackend'
+    connection_backend = "django_mail_viewer.backends.locmem.EmailBackend"
 
     def setUp(self):
         mail.outbox = []
@@ -42,7 +43,7 @@ class LocMemBackendTest(SimpleTestCase):
         """
 
         m = mail.EmailMultiAlternatives(
-            'Email 2 subject', 'Email 2 text', 'test@example.com', ['to1@example.com', 'to2.example.com']
+            "Email 2 subject", "Email 2 text", "test@example.com", ["to1@example.com", "to2.example.com"]
         )
         with mail.get_connection(self.connection_backend) as connection:
             self.assertEqual([], mail.outbox)
@@ -51,12 +52,12 @@ class LocMemBackendTest(SimpleTestCase):
 
     def test_get_message(self):
 
-        with mail.get_connection('django_mail_viewer.backends.locmem.EmailBackend') as connection:
+        with mail.get_connection("django_mail_viewer.backends.locmem.EmailBackend") as connection:
             send_plaintext_messages(2, connection)
             self.assertEqual(2, len(mail.outbox))
             for message in mail.outbox:
                 # check that we can use the message id to look up a specific message's data
-                self.assertEqual(message, connection.get_message(message.get('Message-ID')))
+                self.assertEqual(message, connection.get_message(message.get("Message-ID")))
 
     def test_get_outbox(self):
         with mail.get_connection(self.connection_backend) as connection:
@@ -70,15 +71,15 @@ class LocMemBackendTest(SimpleTestCase):
         """
         Test the delete() method of the backend deletes the message from the outbox
         """
-        with mail.get_connection('django_mail_viewer.backends.locmem.EmailBackend') as connection:
+        with mail.get_connection("django_mail_viewer.backends.locmem.EmailBackend") as connection:
             send_plaintext_messages(3, connection)
             target_message = connection.get_outbox()[1]
-            target_id = target_message.get('message-id')
+            target_id = target_message.get("message-id")
             connection.delete_message(target_id)
             self.assertEqual(2, len(connection.get_outbox()))
             for message in connection.get_outbox():
                 self.assertNotEqual(
-                    target_id, message.get('message-id'), f'Message with id {target_id} found in outbox after delete.'
+                    target_id, message.get("message-id"), f"Message with id {target_id} found in outbox after delete."
                 )
 
 
@@ -88,7 +89,7 @@ class CacheBackendTest(SimpleTestCase):
     """
 
     maxDiff = None
-    connection_backend = 'django_mail_viewer.backends.cache.EmailBackend'
+    connection_backend = "django_mail_viewer.backends.cache.EmailBackend"
 
     def setUp(self):
         # not sure this is the best way to do this, but it'll work for now
@@ -97,7 +98,7 @@ class CacheBackendTest(SimpleTestCase):
 
     def test_send_messages_adds_message_to_cache(self):
         m = mail.EmailMultiAlternatives(
-            'Email 2 subject', 'Email 2 text', 'test@example.com', ['to1@example.com', 'to2.example.com']
+            "Email 2 subject", "Email 2 text", "test@example.com", ["to1@example.com", "to2.example.com"]
         )
         with mail.get_connection(self.connection_backend) as connection:
             self.mail_cache.delete(connection.cache_keys_key)
@@ -116,7 +117,7 @@ class CacheBackendTest(SimpleTestCase):
                 # Not so obvious test here - we know our message ids from the cache, so we just check that looking up
                 # by the message id gets us an email message with the same Message-ID headers
                 # Could also iterate over connection.get_outbox()
-                self.assertEqual(message_id, connection.get_message(message_id).get('Message-ID'))
+                self.assertEqual(message_id, connection.get_message(message_id).get("Message-ID"))
 
     def test_get_outbox(self):
         with mail.get_connection(self.connection_backend) as connection:
@@ -128,10 +129,10 @@ class CacheBackendTest(SimpleTestCase):
             # TODO: A better comparison of the objects. This works for now, though
             message_cache_keys = cache.caches[settings.MAILVIEWER_CACHE].get(connection.cache_keys_key)
             expected = [
-                m.get('Message-ID')
+                m.get("Message-ID")
                 for m in cache.caches[settings.MAILVIEWER_CACHE].get_many(message_cache_keys).values()
             ]
-            actual = [m.get('Message-ID') for m in connection.get_outbox()]
+            actual = [m.get("Message-ID") for m in connection.get_outbox()]
             self.assertEqual(expected, actual)
 
     def test_delete_message(self):
@@ -141,12 +142,12 @@ class CacheBackendTest(SimpleTestCase):
         with mail.get_connection(self.connection_backend) as connection:
             send_plaintext_messages(3, connection)
             target_message = connection.get_outbox()[1]
-            target_id = target_message.get('message-id')
+            target_id = target_message.get("message-id")
             connection.delete_message(target_id)
             self.assertEqual(2, len(connection.get_outbox()))
             for message in connection.get_outbox():
                 self.assertNotEqual(
-                    target_id, message.get('message-id'), f'Message with id {target_id} found in outbox after delete.'
+                    target_id, message.get("message-id"), f"Message with id {target_id} found in outbox after delete."
                 )
 
     def test_cache_lock(self):
@@ -156,6 +157,7 @@ class CacheBackendTest(SimpleTestCase):
         results = []
         concurrency = 5
         with mail.get_connection(self.connection_backend) as connection:
+
             def concurrent(results):
                 try:
                     myid = "123-%s" % threading.current_thread().ident
@@ -167,6 +169,7 @@ class CacheBackendTest(SimpleTestCase):
                             results.append(False)
                 except Exception:
                     results.append(False)
+
             threads = []
             for i in range(concurrency):
                 threads.append(threading.Thread(target=concurrent, args=(results,)))
@@ -188,7 +191,7 @@ class CacheBackendTest(SimpleTestCase):
         messages = []
         for i in range(3, 8):
             m = mail.EmailMultiAlternatives(
-                f'Email {i} subject', f'Email {i} text', 'test_multi@example.com', [f'to{i}@example.com']
+                f"Email {i} subject", f"Email {i} text", "test_multi@example.com", [f"to{i}@example.com"]
             )
             messages.append(m)
         with mail.get_connection(self.connection_backend) as connection:
@@ -204,9 +207,9 @@ class CacheBackendTest(SimpleTestCase):
                 t.join()
             cache_keys = self.mail_cache.get(connection.cache_keys_key)
             self.assertEqual(5, len(cache_keys))
-            original_messages_before_message_id = [m.message().as_string().split('Message-ID:')[0] for m in messages]
+            original_messages_before_message_id = [m.message().as_string().split("Message-ID:")[0] for m in messages]
             for key in cache_keys:
-                sent_message_before_message_id = self.mail_cache.get(key).as_string().split('Message-ID:')[0]
+                sent_message_before_message_id = self.mail_cache.get(key).as_string().split("Message-ID:")[0]
                 self.assertIn(sent_message_before_message_id, original_messages_before_message_id)
 
 
@@ -215,7 +218,7 @@ class DatabaseBackendTest(TestCase):
     Test django_mail_viewer.backends.cache.EmailBackend
     """
 
-    connection_backend = 'django_mail_viewer.backends.database.backend.EmailBackend'
+    connection_backend = "django_mail_viewer.backends.database.backend.EmailBackend"
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -227,16 +230,16 @@ class DatabaseBackendTest(TestCase):
     def test_send_plaintext_email(self):
         original_email_count = EmailMessage.objects.count()
         m = mail.EmailMultiAlternatives(
-            'Email subject', 'Email text', 'test@example.com', ['to1@example.com', 'to2.example.com']
+            "Email subject", "Email text", "test@example.com", ["to1@example.com", "to2.example.com"]
         )
         with mail.get_connection(self.connection_backend) as connection:
             self.assertEqual(1, connection.send_messages([m]))
 
         self.assertEqual(original_email_count + 1, EmailMessage.objects.count())
-        email = EmailMessage.objects.latest('id')
+        email = EmailMessage.objects.latest("id")
 
         expected_headers = {
-            "Content-Type": "text/plain; charset=\"utf-8\"",
+            "Content-Type": 'text/plain; charset="utf-8"',
             "MIME-Version": "1.0",
             "Content-Transfer-Encoding": "7bit",
             "Subject": "Email subject",
@@ -247,36 +250,36 @@ class DatabaseBackendTest(TestCase):
         actual_headers = json.loads(email.message_headers)
         # Make sure there is a `Date` key in the headers and it has a value, but am not trying to match it up since
         # I have no good way of knowing what it should be.
-        self.assertTrue(actual_headers.get('Date'))
+        self.assertTrue(actual_headers.get("Date"))
         # Now remove the `Date` key so that the dicts can be compared.
-        del actual_headers['Date']
+        del actual_headers["Date"]
         self.assertEqual(expected_headers, actual_headers)
-        self.assertEqual('Email text', email.content)
+        self.assertEqual("Email text", email.content)
 
     def test_send_html_email_with_attachment(self):
         original_email_count = EmailMessage.objects.count()
         m = mail.EmailMultiAlternatives(
-            'Email subject', 'Email text', 'test@example.com', ['to1@example.com', 'to2.example.com']
+            "Email subject", "Email text", "test@example.com", ["to1@example.com", "to2.example.com"]
         )
 
         m.attach_alternative(
             '<html><body><p style="background-color: #AABBFF; color: white">Email html</p></body></html>',
-            'text/html',
+            "text/html",
         )
 
         current_dir = Path(__file__).resolve().parent
-        m.attach_file(current_dir / 'test_files' / 'icon.gif', 'image/gif')
+        m.attach_file(current_dir / "test_files" / "icon.gif", "image/gif")
 
         with mail.get_connection(self.connection_backend) as connection:
             self.assertEqual(1, connection.send_messages([m]))
 
         # The main message, the multipart/alternative, the text/plain, the text/html, and the attached img/gif
         self.assertEqual(original_email_count + 5, EmailMessage.objects.count())
-        email = EmailMessage.objects.filter(parent=None).exclude(message_id='').latest('id')
+        email = EmailMessage.objects.filter(parent=None).exclude(message_id="").latest("id")
 
         parts_test_matrix = {
-            'multipart/mixed': {
-                'headers': {
+            "multipart/mixed": {
+                "headers": {
                     "Content-Type": "multipart/mixed",
                     "MIME-Version": "1.0",
                     "Subject": "Email subject",
@@ -284,49 +287,49 @@ class DatabaseBackendTest(TestCase):
                     "To": "to1@example.com, to2.example.com",
                     "Message-ID": email.message_id,
                 },
-                'content': '',
-                'attachment': '',
-                'parent': None,
+                "content": "",
+                "attachment": "",
+                "parent": None,
             },
-            'multipart/alternative': {
-                'headers': {
-                    'Content-Type': 'multipart/alternative',
-                    'MIME-Version': '1.0',
+            "multipart/alternative": {
+                "headers": {
+                    "Content-Type": "multipart/alternative",
+                    "MIME-Version": "1.0",
                 },
-                'content': '',
-                'attachment': '',
-                'parent': email,
+                "content": "",
+                "attachment": "",
+                "parent": email,
             },
-            'text/plain': {
-                'headers': {
-                    'Content-Type': 'text/plain; charset=\"utf-8\"',
-                    'MIME-Version': '1.0',
-                    'Content-Transfer-Encoding': '7bit',
+            "text/plain": {
+                "headers": {
+                    "Content-Type": 'text/plain; charset="utf-8"',
+                    "MIME-Version": "1.0",
+                    "Content-Transfer-Encoding": "7bit",
                 },
-                'content': 'Email text',
-                'attachment': '',
-                'parent': email,
+                "content": "Email text",
+                "attachment": "",
+                "parent": email,
             },
-            'text/html': {
-                'headers': {
-                    'Content-Type': 'text/html; charset="utf-8"',
-                    'MIME-Version': '1.0',
-                    'Content-Transfer-Encoding': '7bit',
+            "text/html": {
+                "headers": {
+                    "Content-Type": 'text/html; charset="utf-8"',
+                    "MIME-Version": "1.0",
+                    "Content-Transfer-Encoding": "7bit",
                 },
-                'content': '<html><body><p style="background-color: #AABBFF; color: white">Email html</p></body></html>',
-                'attachment': '',
-                'parent': email,
+                "content": '<html><body><p style="background-color: #AABBFF; color: white">Email html</p></body></html>',
+                "attachment": "",
+                "parent": email,
             },
-            'image/gif': {
-                'headers': {
-                    'Content-Type': 'image/gif',
-                    'MIME-Version': '1.0',
-                    'Content-Transfer-Encoding': 'base64',
-                    'Content-Disposition': 'attachment; filename="icon.gif"',
+            "image/gif": {
+                "headers": {
+                    "Content-Type": "image/gif",
+                    "MIME-Version": "1.0",
+                    "Content-Transfer-Encoding": "base64",
+                    "Content-Disposition": 'attachment; filename="icon.gif"',
                 },
-                'content': '',
-                'attachment': 'mailviewer_attachments/icon.gif',
-                'parent': email,
+                "content": "",
+                "attachment": "mailviewer_attachments/icon.gif",
+                "parent": email,
             },
         }
 
@@ -340,13 +343,13 @@ class DatabaseBackendTest(TestCase):
                 current_test = parts_test_matrix[content_type]
                 tested_parts.append(content_type)
                 actual_headers = json.loads(part.message_headers)
-                if actual_headers.get('Date'):
+                if actual_headers.get("Date"):
                     # Now remove the `Date` key so that the dicts can be compared for the multipart/mixed
                     # would love to find a way to properly compare them
-                    del actual_headers['Date']
-                self.assertEqual(current_test['headers'], actual_headers)
-                self.assertEqual(current_test['content'], part.content)
-                self.assertEqual(current_test['attachment'], str(part.file_attachment))
+                    del actual_headers["Date"]
+                self.assertEqual(current_test["headers"], actual_headers)
+                self.assertEqual(current_test["content"], part.content)
+                self.assertEqual(current_test["attachment"], str(part.file_attachment))
 
         self.assertEqual(list(parts_test_matrix.keys()).sort(), tested_parts.sort())
 
@@ -376,10 +379,10 @@ class DatabaseBackendTest(TestCase):
         with mail.get_connection(self.connection_backend) as connection:
             send_plaintext_messages(3, connection)
             target_message = connection.get_outbox()[1]
-            target_id = target_message.get('message-id')
+            target_id = target_message.get("message-id")
             connection.delete_message(target_id)
             self.assertEqual(2, len(connection.get_outbox()))
             for message in connection.get_outbox():
                 self.assertNotEqual(
-                    target_id, message.get('message-id'), f'Message with id {target_id} found in outbox after delete.'
+                    target_id, message.get("message-id"), f"Message with id {target_id} found in outbox after delete."
                 )
