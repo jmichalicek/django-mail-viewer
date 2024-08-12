@@ -1,7 +1,7 @@
 import email.message
 import email.utils
 import json
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import Any, Dict, List, Union
 
 from django.db import models
 
@@ -12,7 +12,7 @@ class AbstractBaseEmailMessage(models.Model):
     storage for the Message FileField. Once Django 3.1+ only is supported then a callable may be used
     rendering this not really necessary.
 
-    To customize, subclass this and add a `FileField()` named `serialized_message_file` with the storage you would
+    To customize, subclass this and add a `FileField()` named `file_attachment` with the storage you would
     like to use.
     """
 
@@ -30,16 +30,10 @@ class AbstractBaseEmailMessage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    file_attachment: models.FileField
+
     class Meta:
         abstract = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # methods here expect the concrete subclasses to implement the file_attachment field
-        # should only be necessary until django 2.2 support is dropped... I hope
-        if TYPE_CHECKING and not hasattr(self, "file_attachment"):
-            self.file_attachment = models.FileField(blank=True, default="", upload_to="mailviewer_attachments")
 
     # I really only need/use get_filename(), get_content_type(), get_payload(), walk()
     # returns Any due to failobj
