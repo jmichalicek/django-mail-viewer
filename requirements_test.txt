@@ -4,8 +4,7 @@ flake8
 pytest
 tox
 tox-gh-actions
-django-stubs
-mypy
+django-stubs[compatible-mypy]
 typing-extensions
 black
 ruff

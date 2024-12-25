@@ -1,4 +1,6 @@
-FROM python:3.8-bookworm AS dev
+ARG PYTHON_VERSION=3.8
+ARG DEBIAN_DISTRO=bookworm
+FROM python:${PYTHON_VERSION}-${DEBIAN_DISTRO} AS dev
 # Dockerfile for running a test django installation
 LABEL maintainer="Justin Michalicek <jmichalicek@gmail.com>"
 ENV PYTHONUNBUFFERED 1
